@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { OracleLogin } from '@/components/OracleLogin';
-import { EnhancedOracleChat } from '@/components/EnhancedOracleChat';
+import { OracleApp } from '@/components/oracle/OracleApp';
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -11,5 +11,10 @@ export default function Home() {
     return <OracleLogin onLogin={() => setIsAuthenticated(true)} />;
   }
 
-  return <EnhancedOracleChat />;
+  return (
+    <OracleApp 
+      onLogout={() => setIsAuthenticated(false)}
+      initialTab="chat"
+    />
+  );
 }
