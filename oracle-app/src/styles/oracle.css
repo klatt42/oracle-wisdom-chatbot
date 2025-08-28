@@ -1,0 +1,426 @@
+/* 🔮 Oracle of Business Wisdom - Mystical UI Styles */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  /* Oracle Color Palette */
+  --oracle-gold: #FFD700;
+  --oracle-light-gold: #FFF176;
+  --oracle-dark-gold: #B8860B;
+  --oracle-blue: #1E3A8A;
+  --oracle-light-blue: #3B82F6;
+  --oracle-dark-blue: #0F172A;
+  --oracle-purple: #7C3AED;
+  --oracle-light-purple: #A855F7;
+  --oracle-mystical-bg: rgba(15, 23, 42, 0.95);
+  
+  /* Gradients */
+  --oracle-gold-gradient: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6B35 100%);
+  --oracle-blue-gradient: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 50%, #7C3AED 100%);
+  --oracle-mystical-gradient: linear-gradient(135deg, rgba(30, 58, 138, 0.3) 0%, rgba(124, 58, 237, 0.3) 50%, rgba(255, 215, 0, 0.1) 100%);
+  
+  /* Shadows */
+  --oracle-glow: 0 0 20px rgba(255, 215, 0, 0.3);
+  --oracle-blue-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+  --oracle-mystical-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Global Oracle Styling */
+body {
+  background: var(--oracle-mystical-bg);
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+  color: #E2E8F0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+}
+
+/* Oracle Typography */
+.oracle-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.oracle-text {
+  color: #CBD5E1;
+  line-height: 1.6;
+}
+
+/* Oracle Cards */
+.oracle-card {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 215, 0, 0.1),
+    0 0 0 1px rgba(255, 215, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.oracle-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.oracle-card:hover::before {
+  opacity: 1;
+}
+
+.oracle-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 215, 0, 0.2),
+    0 0 30px rgba(255, 215, 0, 0.1);
+}
+
+/* Oracle Buttons */
+.oracle-button {
+  background: var(--oracle-gold-gradient);
+  border: none;
+  border-radius: 12px;
+  color: var(--oracle-dark-blue);
+  font-weight: 600;
+  font-family: 'Cinzel', serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 16px rgba(255, 215, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.oracle-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.oracle-button:hover::before {
+  left: 100%;
+}
+
+.oracle-button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 8px 24px rgba(255, 215, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.oracle-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.oracle-button-secondary {
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  color: #93C5FD;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.oracle-button-secondary:hover {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #DBEAFE;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+/* Oracle Input */
+.oracle-input {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 12px;
+  color: #E2E8F0;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.oracle-input:focus {
+  outline: none;
+  border-color: rgba(255, 215, 0, 0.6);
+  box-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.2),
+    inset 0 1px 0 rgba(255, 215, 0, 0.1);
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.oracle-input::placeholder {
+  color: rgba(203, 213, 225, 0.5);
+  font-style: italic;
+}
+
+/* Oracle Glow Effects */
+.oracle-glow {
+  filter: drop-shadow(0 0 8px currentColor);
+  animation: oracle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes oracle-pulse {
+  0%, 100% { 
+    filter: drop-shadow(0 0 8px currentColor); 
+    opacity: 1;
+  }
+  50% { 
+    filter: drop-shadow(0 0 16px currentColor); 
+    opacity: 0.8;
+  }
+}
+
+/* Mystical Animations */
+@keyframes mystical-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-10px) rotate(1deg); }
+  66% { transform: translateY(-5px) rotate(-1deg); }
+}
+
+@keyframes oracle-shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+.mystical-float {
+  animation: mystical-float 6s ease-in-out infinite;
+}
+
+.oracle-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+  background-size: 200px 100%;
+  animation: oracle-shimmer 3s infinite;
+}
+
+/* Streaming Text Animation */
+.streaming-cursor::after {
+  content: '|';
+  animation: blink 1s infinite;
+  color: var(--oracle-gold);
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Citation Expand Animation */
+.citation-expand {
+  animation: citation-expand 0.3s ease-out;
+}
+
+@keyframes citation-expand {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 200px;
+    opacity: 1;
+  }
+}
+
+/* Business Widget Styles */
+.business-widget {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.business-widget::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+  z-index: -1;
+  border-radius: 14px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.business-widget:hover::before {
+  opacity: 1;
+}
+
+.business-widget:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+}
+
+/* Message Animations */
+.message-enter {
+  animation: messageEnter 0.5s ease-out;
+}
+
+@keyframes messageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Conversation History Styles */
+.conversation-item {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+
+.conversation-item:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateX(4px);
+}
+
+.conversation-item.active {
+  background: rgba(255, 215, 0, 0.1);
+  border-color: rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
+}
+
+/* Avatar Glow Effects */
+.avatar-oracle {
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, rgba(255, 165, 0, 0.2) 70%, transparent 100%);
+  box-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.3),
+    inset 0 0 20px rgba(255, 215, 0, 0.1);
+}
+
+.avatar-user {
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, rgba(147, 197, 253, 0.2) 70%, transparent 100%);
+  box-shadow: 
+    0 0 20px rgba(59, 130, 246, 0.3),
+    inset 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+/* Framework Tags */
+.framework-tag {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  color: #FCD34D;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  transition: all 0.3s ease;
+}
+
+.framework-tag:hover {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 165, 0, 0.3));
+  border-color: rgba(255, 215, 0, 0.5);
+  color: #FEF3C7;
+  transform: scale(1.05);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .oracle-card {
+    margin: 8px;
+    border-radius: 12px;
+  }
+  
+  .oracle-title {
+    font-size: 1.5rem;
+  }
+  
+  .oracle-button, .oracle-input {
+    font-size: 14px;
+    border-radius: 8px;
+  }
+  
+  .business-widget {
+    padding: 8px;
+  }
+}
+
+/* Loading Animations */
+.oracle-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.oracle-loading-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--oracle-gold);
+  animation: oracle-loading-bounce 1.4s ease-in-out infinite both;
+}
+
+.oracle-loading-dot:nth-child(1) { animation-delay: -0.32s; }
+.oracle-loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes oracle-loading-bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.3), rgba(255, 165, 0, 0.3));
+  border-radius: 4px;
+  border: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.5), rgba(255, 165, 0, 0.5));
+}
+
+/* Text Selection */
+::selection {
+  background: rgba(255, 215, 0, 0.3);
+  color: #FEF3C7;
+}
