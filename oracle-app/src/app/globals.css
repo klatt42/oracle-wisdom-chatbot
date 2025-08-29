@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+/* Oracle Mystical Theme - Blue/Gold Wisdom Colors */
+:root {
+  --oracle-deep-blue: #0B1426;
+  --oracle-midnight-blue: #1A2B47;
+  --oracle-mystic-blue: #2D4A7A;
+  --oracle-wisdom-gold: #FFD700;
+  --oracle-ancient-gold: #B8860B;
+  --oracle-light-gold: #FFF8DC;
+  --oracle-text-light: #E8F4FD;
+  --oracle-text-dark: #1A2B47;
+  --oracle-glow-blue: #4A90E2;
+  --oracle-shadow: rgba(11, 20, 38, 0.3);
+  
+  --background: var(--oracle-deep-blue);
+  --foreground: var(--oracle-text-light);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: linear-gradient(135deg, var(--oracle-deep-blue) 0%, var(--oracle-midnight-blue) 100%);
+  color: var(--oracle-text-light);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Oracle Mystical Background Pattern */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 25% 25%, var(--oracle-glow-blue) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, var(--oracle-wisdom-gold) 0%, transparent 50%);
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Oracle Wisdom Typography */
+.oracle-title {
+  background: linear-gradient(135deg, var(--oracle-wisdom-gold) 0%, var(--oracle-ancient-gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  text-shadow: 0 2px 4px var(--oracle-shadow);
+}
+
+.oracle-text {
+  color: var(--oracle-text-light);
+  line-height: 1.7;
+}
+
+/* Oracle Interface Components */
+.oracle-card {
+  background: rgba(26, 43, 71, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px var(--oracle-shadow);
+}
+
+.oracle-input {
+  background: rgba(45, 74, 122, 0.3);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 8px;
+  color: var(--oracle-text-light);
+  transition: all 0.3s ease;
+}
+
+.oracle-input:focus {
+  border-color: var(--oracle-wisdom-gold);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  outline: none;
+}
+
+.oracle-button {
+  background: linear-gradient(135deg, var(--oracle-wisdom-gold) 0%, var(--oracle-ancient-gold) 100%);
+  color: var(--oracle-text-dark);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.oracle-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+/* Oracle Animation Effects */
+@keyframes oracle-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.oracle-glow {
+  animation: oracle-glow 2s ease-in-out infinite;
+}
