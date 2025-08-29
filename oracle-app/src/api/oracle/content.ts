@@ -18,7 +18,7 @@ import { OracleYouTubeExtractor } from '../../services/content/youtubeExtractor'
 import { OracleEmbeddingService } from '../../services/content/embeddingService';
 
 // Types
-import { ContentItem, ProcessingResult, ContentMetadata } from '../../types/content';
+import { ContentItem, ProcessingResult } from '../../types/content';
 
 // API Interfaces
 export interface ContentUploadRequest {
@@ -42,7 +42,7 @@ export interface ContentUploadResponse {
   error?: {
     code: string;
     message: string;
-    details?: any;
+    details?: Record<string, unknown>;
   };
 }
 
@@ -74,10 +74,20 @@ export interface ContentLibraryResponse {
   };
 }
 
+export interface ContentProcessingOptions {
+  quality_threshold?: number;
+  include_frameworks?: boolean;
+  generate_embeddings?: boolean;
+  chunk_size?: number;
+  overlap_size?: number;
+  language?: string;
+  [key: string]: unknown;
+}
+
 export interface ContentProcessingRequest {
   itemId: string;
   action: 'reprocess' | 'analyze' | 'extract_frameworks' | 'generate_summary';
-  options?: any;
+  options?: ContentProcessingOptions;
 }
 
 export interface ContentProcessingResponse {

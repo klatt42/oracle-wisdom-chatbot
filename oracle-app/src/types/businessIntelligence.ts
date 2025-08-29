@@ -341,7 +341,7 @@ export interface ContentRelationship {
   validation_status: 'confirmed' | 'pending' | 'disputed';
 }
 
-export default {
+const BusinessIntelligenceTypes = {
   BusinessLifecycleStage,
   IndustryVertical,
   FunctionalArea,
@@ -354,3 +354,5 @@ export default {
   UserIntent,
   ContentRelationshipType
 };
+
+export default BusinessIntelligenceTypes;

@@ -185,20 +185,39 @@ export interface ProcessingStatistics {
   processingSteps: ProcessingStep[];
 }
 
+export interface ProcessingStepDetails {
+  progress?: number;
+  itemsProcessed?: number;
+  totalItems?: number;
+  currentItem?: string;
+  metrics?: Record<string, number>;
+  warnings?: string[];
+  [key: string]: unknown;
+}
+
+export interface ProcessingErrorDetails {
+  originalError?: string;
+  stackTrace?: string;
+  context?: Record<string, unknown>;
+  retryable?: boolean;
+  timestamp?: string;
+  [key: string]: unknown;
+}
+
 export interface ProcessingStep {
   step: string;
   status: 'pending' | 'running' | 'completed' | 'error';
   startTime?: Date;
   endTime?: Date;
   duration?: number;
-  details?: any;
+  details?: ProcessingStepDetails;
 }
 
 export interface ProcessingError {
   code: string;
   message: string;
   step?: string;
-  details?: any;
+  details?: ProcessingErrorDetails;
   severity: 'low' | 'medium' | 'high' | 'critical';
 }
 

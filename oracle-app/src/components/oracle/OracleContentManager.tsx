@@ -516,7 +516,7 @@ export function OracleContentManager() {
           </div>
           <select
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value as any)}
+            onChange={(e) => setFilterType(e.target.value as 'all' | 'pdf' | 'docx' | 'txt' | 'md' | 'url' | 'youtube')}
             className="oracle-input px-3 py-2"
           >
             <option value="all">All Types</option>
@@ -529,7 +529,7 @@ export function OracleContentManager() {
           </select>
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as any)}
+            onChange={(e) => setFilterStatus(e.target.value as 'all' | 'uploading' | 'processing' | 'completed' | 'error')}
             className="oracle-input px-3 py-2"
           >
             <option value="all">All Status</option>

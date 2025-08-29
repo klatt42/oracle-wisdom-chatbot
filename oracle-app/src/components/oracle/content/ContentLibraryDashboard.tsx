@@ -14,7 +14,6 @@ import {
   TrashIcon,
   PencilIcon,
   ArrowDownTrayIcon,
-  ChartBarIcon,
   CalendarIcon,
   TagIcon,
   DocumentTextIcon,
