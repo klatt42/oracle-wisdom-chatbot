@@ -5,7 +5,7 @@
 
 import { supabaseAdmin } from '../supabase';
 import * as cheerio from 'cheerio';
-import { readability } from 'mozilla-readability';
+import { Readability } from 'mozilla-readability';
 import { JSDOM } from 'jsdom';
 
 export interface UrlScrapingOptions {
@@ -88,13 +88,14 @@ export class UrlScraper {
       const dom = new JSDOM(html, { url: finalUrl });
       
       // Use Mozilla Readability for content extraction
-      const readabilityResult = readability(dom.document, {
+      const reader = new Readability(dom.document, {
         debug: false,
         maxElemsToParse: 0,
         nbTopCandidates: 5,
         charThreshold: 500,
         classesToPreserve: []
       });
+      const readabilityResult = reader.parse();
 
       // Extract metadata
       const metadata = this.extractMetadata($, finalUrl);

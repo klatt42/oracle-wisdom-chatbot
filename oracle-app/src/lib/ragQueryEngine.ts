@@ -5,7 +5,7 @@
  */
 
 import { OracleVectorDB, SearchResult } from './oracleVectorDB';
-import { BusinessQueryProcessor } from './businessSearchOptimizer';
+import { BusinessScenarioProcessor } from './businessSearchOptimizer';
 import { CitationBuilder, CitationIntegratedSearch } from './citationSystem';
 import { ContentNavigationOptimizer } from './contentHierarchy';
 import { 
@@ -99,13 +99,13 @@ export interface ImplementationGuidance {
 // Main RAG Query Engine
 export class RAGQueryEngine {
   private vectorDB: OracleVectorDB;
-  private queryProcessor: BusinessQueryProcessor;
+  private queryProcessor: BusinessScenarioProcessor;
   private citationEngine: CitationIntegratedSearch;
   private navigationOptimizer: ContentNavigationOptimizer;
   
   constructor() {
     this.vectorDB = new OracleVectorDB();
-    this.queryProcessor = new BusinessQueryProcessor();
+    this.queryProcessor = new BusinessScenarioProcessor();
     this.citationEngine = new CitationIntegratedSearch();
     this.navigationOptimizer = new ContentNavigationOptimizer();
   }

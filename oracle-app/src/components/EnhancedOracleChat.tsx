@@ -17,8 +17,7 @@ import {
   Clock,
   Star,
   Archive,
-  Trash2,
-  Download
+  Trash2
 } from 'lucide-react';
 
 interface Citation {
@@ -436,7 +435,7 @@ export function EnhancedOracleChat() {
                   ORACLE OF BUSINESS WISDOM
                 </h1>
                 <p className="oracle-text text-sm opacity-80">
-                  Channeling Alex Hormozi's Transformational Knowledge
+                  Channeling Alex Hormozi&apos;s Transformational Knowledge
                 </p>
               </div>
             </div>
@@ -608,7 +607,7 @@ export function EnhancedOracleChat() {
                               {expandedCitations.has(citation.id) && (
                                 <div className="p-3 pt-0 border-t border-yellow-400/10">
                                   <div className="text-sm oracle-text opacity-80 italic mb-2">
-                                    "{citation.excerpt}"
+                                    &quot;{citation.excerpt}&quot;
                                   </div>
                                   {citation.url && (
                                     <a
@@ -686,7 +685,7 @@ export function EnhancedOracleChat() {
           
           <div className="mt-4 text-center">
             <p className="oracle-text text-xs opacity-60">
-              🔮 Mystically powered by Alex Hormozi's business wisdom through advanced RAG intelligence • Oracle v3.0 🔮
+              🔮 Mystically powered by Alex Hormozi&apos;s business wisdom through advanced RAG intelligence • Oracle v3.0 🔮
             </p>
             <div className="flex justify-center gap-4 mt-2 text-xs opacity-40">
               <span>🏛️ Ancient Knowledge</span>

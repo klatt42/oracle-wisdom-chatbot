@@ -321,7 +321,7 @@ export class OracleVectorDB {
   // Parse Oracle content file
   private parseContentFile(content: string): { title: string; metadata: any; cleanContent: string; wordCount: number } {
     let title = 'Untitled';
-    let metadata: any = {};
+    const metadata: any = {};
     let cleanContent = content;
     
     // Extract frontmatter

@@ -72,7 +72,7 @@ const FileUploadInterface: React.FC<FileUploadInterfaceProps> = ({
     
     // Start upload process
     await processFiles(newFiles);
-  }, []);
+  }, [processFiles]);
 
   const { getRootProps, getInputProps, isDragAccept, isDragReject } = useDropzone({
     onDrop,

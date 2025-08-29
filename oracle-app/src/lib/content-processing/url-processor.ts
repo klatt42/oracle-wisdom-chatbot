@@ -9,16 +9,18 @@ import { supabaseAdmin } from '../supabase';
 import { urlScraper, type ScrapedContent, type UrlScrapingOptions } from './url-scraper';
 import { ContentProcessor } from './content-processor';
 import { BusinessFrameworkDetector } from './framework-detector';
+import { 
+  ProcessingJob,
+  UrlProcessingResult,
+  ProcessedContent,
+  ContentMetadata,
+  ProcessingStatus 
+} from '@/types/oracle';
 
-export interface UrlProcessingJob {
-  id: string;
-  url: string;
-  status: 'pending' | 'scraping' | 'processing' | 'completed' | 'failed';
-  progress: number;
-  startTime: Date;
-  endTime?: Date;
-  error?: string;
-  contentId?: string;
+// Legacy support - extend ProcessingJob for URL-specific fields
+export interface UrlProcessingJob extends ProcessingJob {
+  type: 'url';
+  input: string; // URL
   metadata?: {
     title?: string;
     domain?: string;
@@ -28,18 +30,7 @@ export interface UrlProcessingJob {
   };
 }
 
-export interface UrlProcessingResult {
-  success: boolean;
-  contentId?: string;
-  error?: string;
-  metadata?: {
-    title: string;
-    wordCount: number;
-    quality: number;
-    frameworks: string[];
-    processingTime: number;
-  };
-}
+// Use the centralized UrlProcessingResult from types
 
 export class UrlProcessor {
   private contentProcessor: ContentProcessor;

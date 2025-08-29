@@ -98,7 +98,7 @@ const OracleContentManagementSystem: React.FC = () => {
       // Gentle nudge to status tab with notification
       addNotification('info', 'Content processing started. Switch to Status tab to monitor progress.');
     }
-  }, [processingJobs]);
+  }, [processingJobs, activeTab, addNotification]);
 
   const addNotification = useCallback((type: 'success' | 'error' | 'info', message: string) => {
     const notification = {
@@ -192,7 +192,7 @@ const OracleContentManagementSystem: React.FC = () => {
     
     setProcessingJobs(prev => [...prev, ...newJobs]);
     addNotification('info', `${files.length} file(s) added to processing queue`);
-  }, []);
+  }, [addNotification]);
 
   const handleFileRemoved = useCallback((fileId: string) => {
     setProcessingJobs(prev => prev.filter(job => job.id !== fileId));
@@ -312,7 +312,7 @@ const OracleContentManagementSystem: React.FC = () => {
         addNotification('error', 'Failed to delete content');
       }
     }
-  }, []);
+  }, [addNotification]);
 
   const handleContentDownload = useCallback(async (contentId: string) => {
     try {
@@ -337,7 +337,7 @@ const OracleContentManagementSystem: React.FC = () => {
     } catch (error) {
       addNotification('error', 'Failed to download content');
     }
-  }, []);
+  }, [addNotification]);
 
   const getTabIcon = (tab: TabType) => {
     switch (tab) {

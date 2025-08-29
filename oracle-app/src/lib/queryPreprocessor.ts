@@ -4,7 +4,7 @@
  * Integrated with Alice Intelligence business context understanding
  */
 
-import { BusinessQueryProcessor } from './businessSearchOptimizer';
+import { BusinessScenarioProcessor } from './businessSearchOptimizer';
 import {
   UserIntent,
   BusinessLifecycleStage,
@@ -193,7 +193,7 @@ export enum EntityType {
 
 // Main Query Preprocessing System
 export class QueryPreprocessor {
-  private businessQueryProcessor: BusinessQueryProcessor;
+  private businessQueryProcessor: BusinessScenarioProcessor;
   private businessTerminologyMap: Map<string, BusinessTerm> = new Map();
   private frameworkDetectionPatterns: Map<HormoziFramework, RegExp[]> = new Map();
   private synonymExpansionMap: Map<string, string[]> = new Map();
@@ -201,7 +201,7 @@ export class QueryPreprocessor {
   private preprocessingCache: Map<string, ProcessedQuery> = new Map();
 
   constructor() {
-    this.businessQueryProcessor = new BusinessQueryProcessor();
+    this.businessQueryProcessor = new BusinessScenarioProcessor();
     this.initializeBusinessTerminology();
     this.initializeFrameworkDetectionPatterns();
     this.initializeSynonymExpansions();
@@ -282,7 +282,7 @@ export class QueryPreprocessor {
     cleaned = this.fixBusinessTermTypos(cleaned);
     
     // Normalize casing for business acronyms
-    cleaned = this.normalizeBusiness Acronyms(cleaned);
+    cleaned = this.normalizeBusinessAcronyms(cleaned);
     
     return cleaned;
   }
@@ -596,7 +596,7 @@ export class QueryPreprocessor {
   }
   
   private fixBusinessTermTypos(query: string): string { return query; }
-  private normalizeBusiness Acronyms(query: string): string { return query; }
+  private normalizeBusinessAcronyms(query: string): string { return query; }
   private deduplicateAndRankEntities(entities: ExtractedEntity[]): ExtractedEntity[] { return entities; }
   private detectBusinessScenarios(query: string, entities: ExtractedEntity[], context?: UserContextData): BusinessScenario[] { return []; }
   private analyzeFrameworkIndicators(query: string, entities: ExtractedEntity[]): FrameworkIndicator[] { return []; }

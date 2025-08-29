@@ -385,7 +385,7 @@ export class OracleBusinessAnalyzer {
   }
 
   private determineBusinessStage(indicators: string[], userContext: any): BusinessLifecycleStage {
-    let stageScores = {
+    const stageScores = {
       'startup': 0,
       'growth': 0,
       'scaling': 0,

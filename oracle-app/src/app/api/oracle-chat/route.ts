@@ -6,6 +6,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { OracleChat, OracleChatOptions } from '@/lib/oracleChat';
+import { 
+  ApiResponse,
+  WisdomSource,
+  ContentMetadata 
+} from '@/types/oracle';
 
 // Initialize Oracle chat instance
 let oracleChat: OracleChat | null = null;
@@ -18,13 +23,31 @@ async function getOracleChat(): Promise<OracleChat> {
   return oracleChat;
 }
 
-export async function POST(request: NextRequest) {
+interface ChatRequest {
+  message: string;
+  options?: Partial<OracleChatOptions>;
+}
+
+type ChatResponse = ApiResponse<{
+  message: string;
+  metadata: ContentMetadata;
+  timestamp: string;
+}>;
+
+export async function POST(request: NextRequest): Promise<NextResponse<ChatResponse>> {
   try {
-    const { message, options } = await request.json();
+    const requestData: ChatRequest = await request.json();
+    const { message, options } = requestData;
     
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
-        { error: 'Message is required and must be a string' },
+        { 
+          success: false,
+          error: {
+            code: 'INVALID_MESSAGE',
+            message: 'Message is required and must be a string'
+          }
+        },
         { status: 400 }
       );
     }
@@ -43,9 +66,16 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      message: response.content,
-      metadata: response.metadata,
-      timestamp: new Date().toISOString()
+      data: {
+        message: response.content,
+        metadata: response.metadata,
+        timestamp: new Date().toISOString()
+      },
+      metadata: {
+        request_id: `chat_${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        processing_time_ms: 0 // Would be calculated from actual processing time
+      }
     });
     
   } catch (error) {
@@ -54,15 +84,36 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Chat response failed', 
-        message: String(error) 
+        error: {
+          code: 'CHAT_ERROR',
+          message: 'Chat response failed',
+          details: { originalError: String(error) }
+        }
       },
       { status: 500 }
     );
   }
 }
 
-export async function GET(request: NextRequest) {
+type HistoryResponse = ApiResponse<{
+  history: WisdomSource[];
+  count: number;
+}>;
+
+type SuggestionsResponse = ApiResponse<{
+  suggestions: string[];
+  query: string;
+}>;
+
+type InsightsResponse = ApiResponse<{
+  category: string;
+  insights: WisdomSource[];
+  count: number;
+}>;
+
+type GetResponse = HistoryResponse | SuggestionsResponse | InsightsResponse;
+
+export async function GET(request: NextRequest): Promise<NextResponse<GetResponse>> {
   try {
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
@@ -74,8 +125,10 @@ export async function GET(request: NextRequest) {
         const history = oracle.getConversationHistory();
         return NextResponse.json({
           success: true,
-          history: history.slice(1), // Exclude system prompt
-          count: history.length - 1
+          data: {
+            history: history.slice(1), // Exclude system prompt
+            count: history.length - 1
+          }
         });
         
       case 'suggestions':
@@ -83,15 +136,23 @@ export async function GET(request: NextRequest) {
         const suggestions = await oracle.getSearchSuggestions(query);
         return NextResponse.json({
           success: true,
-          suggestions,
-          query
+          data: {
+            suggestions,
+            query
+          }
         });
         
       case 'insights':
         const category = searchParams.get('category');
         if (!category) {
           return NextResponse.json(
-            { error: 'Category parameter is required for insights' },
+            { 
+              success: false,
+              error: {
+                code: 'MISSING_CATEGORY',
+                message: 'Category parameter is required for insights'
+              }
+            },
             { status: 400 }
           );
         }
@@ -99,14 +160,22 @@ export async function GET(request: NextRequest) {
         const insights = await oracle.getCategoryInsights(category);
         return NextResponse.json({
           success: true,
-          category,
-          insights,
-          count: insights.length
+          data: {
+            category,
+            insights,
+            count: insights.length
+          }
         });
         
       default:
         return NextResponse.json(
-          { error: 'Invalid action. Use: history, suggestions, or insights' },
+          { 
+            success: false,
+            error: {
+              code: 'INVALID_ACTION',
+              message: 'Invalid action. Use: history, suggestions, or insights'
+            }
+          },
           { status: 400 }
         );
     }
@@ -117,22 +186,31 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Request failed', 
-        message: String(error) 
+        error: {
+          code: 'GET_ERROR',
+          message: 'Request failed',
+          details: { originalError: String(error) }
+        }
       },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(request: NextRequest) {
+type DeleteResponse = ApiResponse<{
+  message: string;
+}>;
+
+export async function DELETE(_request: NextRequest): Promise<NextResponse<DeleteResponse>> {
   try {
     const oracle = await getOracleChat();
     oracle.clearHistory();
     
     return NextResponse.json({
       success: true,
-      message: 'Conversation history cleared'
+      data: {
+        message: 'Conversation history cleared'
+      }
     });
     
   } catch (error) {
@@ -141,8 +219,11 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Failed to clear history', 
-        message: String(error) 
+        error: {
+          code: 'DELETE_ERROR',
+          message: 'Failed to clear history',
+          details: { originalError: String(error) }
+        }
       },
       { status: 500 }
     );

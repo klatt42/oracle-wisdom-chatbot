@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { 
-  searchHormoziWisdomByContext, 
   searchOracleKnowledgeBase,
-  storeOracleConversation, 
-  type HormoziWisdom 
+  storeOracleConversation
 } from '@/lib/supabase';
+import { WisdomMatch } from '@/types/oracle';
 
 // Initialize Claude client
 const anthropic = new Anthropic({
@@ -62,7 +61,7 @@ function detectBusinessContext(message: string): 'offers' | 'leads' | 'scaling' 
 }
 
 // Format wisdom content for Claude prompt (Enhanced for Phase 3.5)
-function formatWisdomForPrompt(wisdomResults: any[]): string {
+function formatWisdomForPrompt(wisdomResults: WisdomMatch[]): string {
   if (wisdomResults.length === 0) return '';
   
   let wisdomContent = '\n\nRELEVANT BUSINESS WISDOM FROM ORACLE KNOWLEDGE BASE:\n';
@@ -98,7 +97,7 @@ function formatWisdomForPrompt(wisdomResults: any[]): string {
 }
 
 // Generate citations from wisdom results (Enhanced for Phase 3.5)
-function generateCitationsFromWisdom(wisdomResults: any[]): string[] {
+function generateCitationsFromWisdom(wisdomResults: WisdomMatch[]): string[] {
   const citations: string[] = [];
   
   wisdomResults.forEach(wisdom => {

@@ -1,4 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
+import { 
+  SupabaseWisdomQuery, 
+  WisdomMatch, 
+  WisdomMetadata,
+  ProcessedContent,
+  VectorSearchResult 
+} from '@/types/oracle';
 
 // Supabase configuration for Oracle knowledge base
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -20,8 +27,8 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   }
 });
 
-// Interface for Hormozi wisdom search results
-export interface HormoziWisdom {
+// Legacy interface for Hormozi wisdom search results - now extends WisdomMatch
+export interface HormoziWisdom extends WisdomMatch {
   id: number;
   content: string;
   source: string;
@@ -35,6 +42,17 @@ export interface HormoziWisdom {
   success_metrics?: string[];
   related_concepts?: string[];
   similarity?: number;
+  metadata: WisdomMetadata & {
+    book?: string;
+    chapter?: string;
+    topic?: string;
+    framework?: string;
+    business_phase?: string;
+    difficulty_level?: string;
+    implementation_time?: string;
+    success_metrics?: string[];
+    related_concepts?: string[];
+  };
 }
 
 // Vector search function for Alex Hormozi wisdom
@@ -79,7 +97,7 @@ export async function searchHormoziWisdomByContext(
       return [];
     }
 
-    return data || [];
+    return (data || []) as HormoziWisdom[];
   } catch (error) {
     console.error('Context search error:', error);
     return [];
@@ -92,9 +110,10 @@ export async function searchProcessedContent(
   contentTypes: ('file' | 'url' | 'youtube' | 'text')[] = ['file', 'url', 'youtube', 'text'],
   frameworks: string[] = [],
   limit: number = 5
-): Promise<any[]> {
+): Promise<WisdomMatch[]> {
   try {
     // Generate embedding for the query
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const openai = require('openai');
     const client = new openai.OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     
@@ -103,7 +122,7 @@ export async function searchProcessedContent(
       input: query
     });
     
-    const queryEmbedding = embeddingResponse.data[0].embedding;
+    const queryEmbedding: number[] = embeddingResponse.data[0].embedding;
 
     // Search content chunks using the new database schema
     const { data, error } = await supabaseAdmin
@@ -120,7 +139,7 @@ export async function searchProcessedContent(
       return [];
     }
 
-    return data || [];
+    return (data || []) as WisdomMatch[];
   } catch (error) {
     console.error('Processed content search error:', error);
     return [];
@@ -133,7 +152,7 @@ export async function searchOracleKnowledgeBase(
   context: 'offers' | 'leads' | 'scaling' | 'mindset' | 'all' = 'all',
   includeProcessedContent: boolean = true,
   limit: number = 5
-): Promise<any[]> {
+): Promise<WisdomMatch[]> {
   try {
     const results = [];
 

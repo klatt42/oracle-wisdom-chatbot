@@ -98,7 +98,7 @@ const ContentLibraryDashboard: React.FC<ContentLibraryDashboardProps> = ({
   // Apply filters and search
   useEffect(() => {
     applyFiltersAndSearch();
-  }, [contentItems, searchQuery, filters]);
+  }, [contentItems, searchQuery, filters, applyFiltersAndSearch]);
 
   const loadContentItems = async () => {
     try {
@@ -972,7 +972,7 @@ const ContentLibraryDashboard: React.FC<ContentLibraryDashboardProps> = ({
                   <option value="all">All Quality</option>
                   <option value="high">High (80%+)</option>
                   <option value="medium">Medium (60-80%)</option>
-                  <option value="low">Low (<60%)</option>
+                  <option value="low">Low (&lt;60%)</option>
                 </select>
               </div>
 

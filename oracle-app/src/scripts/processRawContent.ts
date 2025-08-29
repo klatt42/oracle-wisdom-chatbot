@@ -409,7 +409,7 @@ class OracleContentProcessor {
   private createEnhancedContent(file: ContentFile, originalContent: string, category: string): string {
     const timestamp = new Date().toISOString();
     
-    let enhanced = `---
+    const enhanced = `---
 title: ${file.title}
 category: ${category}
 source: ${file.fileName}

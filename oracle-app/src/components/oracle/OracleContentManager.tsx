@@ -12,7 +12,6 @@ import {
   Trash2,
   Eye,
   Search,
-  Filter,
   Plus,
   CheckCircle,
   XCircle,
@@ -317,7 +316,7 @@ export function OracleContentManager() {
                 ORACLE KNOWLEDGE FORGE
               </h1>
               <p className="oracle-text text-sm opacity-80">
-                Channel wisdom into the Oracle's consciousness through mystical content ingestion
+                Channel wisdom into the Oracle&apos;s consciousness through mystical content ingestion
               </p>
             </div>
           </div>

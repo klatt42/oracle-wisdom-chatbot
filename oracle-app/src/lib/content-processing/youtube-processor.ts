@@ -7,25 +7,15 @@ import { supabaseAdmin } from '../supabase';
 import { ContentProcessor } from './content-processor';
 import { BusinessFrameworkDetector } from './framework-detector';
 import { google } from 'googleapis';
+import { 
+  YouTubeProcessingResult,
+  YouTubeMetadata,
+  YouTubeChapter,
+  ProcessedContent,
+  ProcessingJob 
+} from '@/types/oracle';
 
-export interface YouTubeVideoData {
-  videoId: string;
-  url: string;
-  title: string;
-  description: string;
-  channelId: string;
-  channelName: string;
-  publishedAt: Date;
-  duration: number;
-  durationFormatted: string;
-  viewCount: number;
-  likeCount: number;
-  commentCount: number;
-  thumbnailUrl: string;
-  thumbnailWidth: number;
-  thumbnailHeight: number;
-}
-
+// Extended YouTube processing options
 export interface YouTubeProcessingOptions {
   includeTranscript?: boolean;
   includeComments?: boolean;
@@ -36,6 +26,7 @@ export interface YouTubeProcessingOptions {
   quality?: 'low' | 'medium' | 'high';
 }
 
+// Legacy support for TranscriptSegment
 export interface TranscriptSegment {
   start: number;
   duration: number;
@@ -43,10 +34,9 @@ export interface TranscriptSegment {
   confidence?: number;
 }
 
-export interface VideoChapter {
-  title: string;
-  startTime: number;
-  endTime: number;
+// Use centralized YouTubeChapter type
+// Legacy support for VideoChapter
+export interface VideoChapter extends YouTubeChapter {
   description?: string;
 }
 

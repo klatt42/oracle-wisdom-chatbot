@@ -644,7 +644,7 @@ export class OracleQueryProcessor {
   ): Promise<{ context_enhanced_query: string; context_additions: BusinessContextAddition[] }> {
 
     const contextAdditions: BusinessContextAddition[] = [];
-    let contextTerms: string[] = [];
+    const contextTerms: string[] = [];
 
     // Add framework components context
     if (classification.business_context.framework_relevance.length > 0) {

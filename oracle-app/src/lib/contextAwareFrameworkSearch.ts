@@ -456,7 +456,7 @@ export class ContextAwareFrameworkSearch {
       const implementationContext = await this.assessImplementationContext(result, userContext);
       
       // Determine business application
-      const businessApplication = await this.analyzeBusiness Application(result, queryClassification);
+      const businessApplication = await this.analyzeBusinessApplication(result, queryClassification);
       
       // Identify success patterns
       const successPatterns = await this.identifySuccessPatterns(result, frameworkAnalysis);

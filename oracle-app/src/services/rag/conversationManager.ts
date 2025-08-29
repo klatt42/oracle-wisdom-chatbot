@@ -268,7 +268,7 @@ export class OracleConversationManager {
   ): Promise<ContextInjectionStrategy> {
     const relevantTurns = this.selectRelevantTurns(session, queryClassification, 8);
     const frameworkContinuity = this.analyzeFrameworkContinuity(relevantTurns, currentTurn);
-    const businessContinuity = this.analyzeBusiness Continuity(session, queryClassification);
+    const businessContinuity = this.analyzeBusinessContinuity(session, queryClassification);
     
     const tokenBudget = this.calculateTokenBudget(session, relevantTurns);
 

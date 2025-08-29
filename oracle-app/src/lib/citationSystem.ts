@@ -300,8 +300,8 @@ export class CrossReferenceValidator {
   ): ConsistencyValidation {
     
     const validationResults: ValidationResult[] = [];
-    let conflictingInformation: string[] = [];
-    let supportingEvidence: string[] = [];
+    const conflictingInformation: string[] = [];
+    const supportingEvidence: string[] = [];
     
     // Compare against each secondary source
     secondarySources.forEach(source => {

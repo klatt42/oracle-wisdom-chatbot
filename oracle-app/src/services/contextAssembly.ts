@@ -498,7 +498,7 @@ export class OracleContextAssemblyEngine {
     }
 
     // Section 2: Supporting Framework Content
-    const supportingFrameworks = this.identifySupporting Frameworks(queryClassification, sources, primaryFramework);
+    const supportingFrameworks = this.identifySupportingFrameworks(queryClassification, sources, primaryFramework);
     for (const framework of supportingFrameworks.slice(0, 2)) { // Limit supporting frameworks
       const supportSection = await this.createFrameworkSection(
         framework,

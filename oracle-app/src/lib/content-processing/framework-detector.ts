@@ -52,7 +52,7 @@ export class BusinessFrameworkDetector {
     let matchCount = 0;
     const matchedKeywords: string[] = [];
     const matchedPhrases: string[] = [];
-    let contextSnippets: string[] = [];
+    const contextSnippets: string[] = [];
 
     // Check keyword matches
     for (const keyword of framework.keywords) {

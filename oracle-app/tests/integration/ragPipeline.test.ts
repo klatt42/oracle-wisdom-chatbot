@@ -373,7 +373,7 @@ class RAGTestRunner {
 // Test Suites
 describe('Oracle RAG Pipeline Integration Tests', () => {
   let testRunner: RAGTestRunner;
-  let testResults: EndToEndTestResult[] = [];
+  const testResults: EndToEndTestResult[] = [];
 
   beforeAll(async () => {
     testRunner = new RAGTestRunner();
@@ -381,7 +381,7 @@ describe('Oracle RAG Pipeline Integration Tests', () => {
   });
 
   afterAll(async () => {
-    console.log('\n=Ê Test Results Summary:');
+    console.log('\n=ï¿½ Test Results Summary:');
     console.log('========================');
     
     const successfulTests = testResults.filter(r => r.success);
@@ -394,7 +394,7 @@ describe('Oracle RAG Pipeline Integration Tests', () => {
       const avgPerformance = successfulTests.reduce((sum, test) => 
         sum + test.performance_metrics.total_time_ms, 0) / successfulTests.length;
       
-      console.log(`ñ  Average Response Time: ${avgPerformance.toFixed(0)}ms`);
+      console.log(`ï¿½  Average Response Time: ${avgPerformance.toFixed(0)}ms`);
     }
   });
 

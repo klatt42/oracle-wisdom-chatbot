@@ -268,7 +268,7 @@ describe('Oracle YouTube Processing API', () => {
 
       // Test text cleaning logic
       for (let i = 0; i < rawTranscript.length; i++) {
-        let cleaned = rawTranscript[i].text
+        const cleaned = rawTranscript[i].text
           .replace(/&amp;/g, '&')
           .replace(/&quot;/g, '"')
           .replace(/&lt;/g, '<')
@@ -365,7 +365,7 @@ describe('Oracle YouTube Processing API', () => {
       ];
 
       const speakerChanges = [];
-      let currentSpeaker = 'Speaker 1';
+      const currentSpeaker = 'Speaker 1';
 
       for (let i = 0; i < transcript.length; i++) {
         const current = transcript[i];
