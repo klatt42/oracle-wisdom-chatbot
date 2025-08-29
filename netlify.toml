@@ -1,0 +1,12 @@
+[build]
+  command = "cd oracle-app && npm install && npm run build"
+  publish = "oracle-app/.next"
+  base = "."
+
+[build.environment]
+  NODE_ENV = "production"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
