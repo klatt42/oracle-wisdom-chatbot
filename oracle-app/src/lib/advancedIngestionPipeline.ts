@@ -65,7 +65,7 @@ export interface ProcessedChunk {
 }
 
 export class HormoziContentProcessor {
-  private readonly chunkSize: number = 1000;
+  protected readonly chunkSize: number = 1000;
   private readonly chunkOverlap: number = 200;
   
   constructor() {
@@ -178,7 +178,7 @@ export class HormoziContentProcessor {
   }
 
   // AI-powered content analysis for metadata generation
-  private async analyzeContent(content: string, filePath: string): Promise<ContentMetadata> {
+  protected async analyzeContent(content: string, filePath: string): Promise<ContentMetadata> {
     const analysisPrompt = `Analyze this Alex Hormozi business content and provide structured metadata:
 
 CONTENT PREVIEW (first 2000 chars):
@@ -324,7 +324,7 @@ Focus on Hormozi methodologies like Grand Slam Offers, Core Four, Value Equation
   }
 
   // Generate embeddings with error handling
-  private async generateEmbedding(text: string): Promise<number[]> {
+  protected async generateEmbedding(text: string): Promise<number[]> {
     try {
       const response = await openai.embeddings.create({
         model: 'text-embedding-3-small',
@@ -339,7 +339,7 @@ Focus on Hormozi methodologies like Grand Slam Offers, Core Four, Value Equation
   }
 
   // Store processed chunk in Supabase
-  private async storeChunk(chunk: ProcessedChunk): Promise<void> {
+  protected async storeChunk(chunk: ProcessedChunk): Promise<void> {
     try {
       const { data, error } = await supabaseAdmin
         .from('hormozi_wisdom')

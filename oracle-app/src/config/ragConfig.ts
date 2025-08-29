@@ -774,9 +774,9 @@ export const DEFAULT_RAG_CONFIG: OracleRAGConfig = {
         ['highly_complex', 0.65]
       ]),
       industry_specific: new Map([
-        [IndustryVertical.SAAS, 0.7],
+        [IndustryVertical.SOFTWARE_SAAS, 0.7],
         [IndustryVertical.ECOMMERCE, 0.65],
-        [IndustryVertical.CONSULTING, 0.75]
+        [IndustryVertical.PROFESSIONAL_SERVICES, 0.75]
       ])
     },
     search_strategies: {
@@ -884,13 +884,13 @@ export const DEFAULT_RAG_CONFIG: OracleRAGConfig = {
           primary_focus: ['foundational_concepts', 'primary_framework'],
           secondary_focus: ['expert_insights', 'case_studies'],
           supporting_content: ['cross_references'],
-          weight_multipliers: { 'foundational_concepts': 1.3, 'primary_framework': 1.2 }
+          weight_multipliers: { 'foundational_concepts': 1.3, 'primary_framework': 1.2 } as Record<string, number>
         }],
         [UserIntent.IMPLEMENTATION, {
           primary_focus: ['implementation_guidance', 'primary_framework'],
           secondary_focus: ['case_studies', 'supporting_framework'],
           supporting_content: ['expert_insights'],
-          weight_multipliers: { 'implementation_guidance': 1.5, 'case_studies': 1.2 }
+          weight_multipliers: { 'implementation_guidance': 1.5, 'case_studies': 1.2 } as Record<string, number>
         }]
       ])
     },
@@ -1255,7 +1255,7 @@ export const DEFAULT_RAG_CONFIG: OracleRAGConfig = {
     },
     industry_specialization: {
       specialized_industries: new Map([
-        [IndustryVertical.SAAS, {
+        [IndustryVertical.SOFTWARE_SAAS, {
           terminology_adaptations: ['subscription', 'churn', 'mrr', 'arr', 'user onboarding'],
           success_metric_preferences: ['monthly recurring revenue', 'churn rate', 'lifetime value'],
           implementation_considerations: ['product-market fit', 'user retention', 'subscription optimization'],
@@ -1330,7 +1330,7 @@ export const DEFAULT_RAG_CONFIG: OracleRAGConfig = {
       reference_section_inclusion: true,
       interactive_citation_links: false,
       source_preview_generation: true,
-      authority_visualization: 'combined'
+      authority_visualization: 'badges'
     },
     quality_assurance: {
       accuracy_validation: true,
@@ -1480,162 +1480,55 @@ export const DEFAULT_RAG_CONFIG: OracleRAGConfig = {
     predefined_profiles: new Map([
       ['startup_founder', {
         profile_name: 'Startup Founder',
-        profile_description: 'Optimized for early-stage entrepreneurs seeking foundational business guidance',
-        target_use_cases: ['business validation', 'initial customer acquisition', 'product-market fit'],
-        configuration_overrides: {
-          context_assembly: {
-            assembly_rules: {
-              max_context_tokens: 80000,
-              implementation_focus_boost: 1.5,
-              financial_metrics_emphasis: 1.1
-            }
-          },
-          response_generation: {
-            personality_settings: {
-              business_practicality_balance: 0.8,
-              mystical_element_density: 0.6
-            }
-          }
-        },
+        profile_description: 'Optimized for early-stage entrepreneurs building their first business',
+        target_use_cases: ['business_validation', 'mvp_development', 'fundraising_prep'],
+        configuration_overrides: {},
         performance_expectations: {
-          response_time_target_ms: 8000,
+          response_time_target_ms: 2000,
           quality_score_target: 0.85,
           user_satisfaction_target: 0.9
         },
-        optimization_focus: 'comprehensiveness'
+        optimization_focus: 'speed'
       }],
       ['scaling_business', {
         profile_name: 'Scaling Business',
-        profile_description: 'Optimized for businesses in growth phase needing systematic scaling strategies',
-        target_use_cases: ['team building', 'process optimization', 'market expansion'],
-        configuration_overrides: {
-          business_intelligence: {
-            metrics_intelligence: {
-              optimization_strategy_generation: true,
-              metric_relationship_mapping: true
-            }
-          },
-          context_assembly: {
-            content_prioritization: {
-              content_type_weights: {
-                implementation_guidance: 1.0,
-                financial_metrics: 0.95,
-                case_studies: 0.9
-              }
-            }
-          }
-        },
+        profile_description: 'For businesses in rapid growth phase needing operational excellence',
+        target_use_cases: ['systems_optimization', 'team_building', 'process_improvement'],
+        configuration_overrides: {},
         performance_expectations: {
-          response_time_target_ms: 10000,
+          response_time_target_ms: 1500,
           quality_score_target: 0.9,
-          user_satisfaction_target: 0.88
+          user_satisfaction_target: 0.95
         },
-        optimization_focus: 'quality'
+        optimization_focus: 'comprehensiveness'
       }]
     ]),
-    custom_profile_support: false,
+    custom_profile_support: true,
     profile_switching_enabled: true,
     scenario_detection: {
       automatic_detection: true,
       detection_criteria: {
-        query_complexity_indicators: ['multiple frameworks', 'financial metrics', 'implementation focus'],
-        user_context_signals: ['business stage', 'industry type', 'expertise level'],
-        business_scenario_markers: ['scaling', 'startup', 'optimization', 'troubleshooting']
+        query_complexity_indicators: ['multi-step', 'complex analysis', 'comprehensive review'],
+        user_context_signals: ['business stage', 'industry vertical', 'functional area'],
+        business_scenario_markers: ['scaling', 'optimization', 'implementation', 'troubleshooting']
       },
-      profile_recommendation_confidence: 0.7,
-      fallback_profile: 'balanced_general'
+      profile_recommendation_confidence: 0.8,
+      fallback_profile: 'startup_founder'
     }
   }
 };
 
-// Configuration utility functions
-export class RAGConfigManager {
-  private currentConfig: OracleRAGConfig = DEFAULT_RAG_CONFIG;
-  private profileOverrides: Map<string, Partial<OracleRAGConfig>> = new Map();
 
-  // Get current configuration
-  getCurrentConfig(): OracleRAGConfig {
-    return this.currentConfig;
+// Configuration manager class
+class RAGConfigManager {
+  private config = DEFAULT_RAG_CONFIG;
+
+  getConfig(): OracleRAGConfig {
+    return this.config;
   }
 
-  // Update configuration with partial overrides
   updateConfig(overrides: Partial<OracleRAGConfig>): void {
-    this.currentConfig = this.mergeConfigs(this.currentConfig, overrides);
-  }
-
-  // Apply scenario profile
-  applyScenarioProfile(profileName: string): boolean {
-    const profile = this.currentConfig.scenario_profiles.predefined_profiles.get(profileName);
-    if (profile && profile.configuration_overrides) {
-      this.updateConfig(profile.configuration_overrides);
-      return true;
-    }
-    return false;
-  }
-
-  // Get configuration for specific component
-  getComponentConfig<T extends keyof OracleRAGConfig>(component: T): OracleRAGConfig[T] {
-    return this.currentConfig[component];
-  }
-
-  // Validate configuration
-  validateConfig(config: Partial<OracleRAGConfig>): { valid: boolean; errors: string[] } {
-    const errors: string[] = [];
-
-    // Validate similarity thresholds
-    if (config.vector_search?.similarity_thresholds) {
-      const thresholds = config.vector_search.similarity_thresholds;
-      if (thresholds.minimum_similarity < 0 || thresholds.minimum_similarity > 1) {
-        errors.push('minimum_similarity must be between 0 and 1');
-      }
-      if (thresholds.high_quality_threshold < thresholds.minimum_similarity) {
-        errors.push('high_quality_threshold must be >= minimum_similarity');
-      }
-    }
-
-    // Validate token limits
-    if (config.context_assembly?.assembly_rules?.max_context_tokens) {
-      const maxTokens = config.context_assembly.assembly_rules.max_context_tokens;
-      if (maxTokens > 200000) {
-        errors.push('max_context_tokens should not exceed 200000 for optimal performance');
-      }
-    }
-
-    // Validate quality thresholds
-    if (config.quality_assurance?.validation_rules?.content_validation) {
-      const validation = config.quality_assurance.validation_rules.content_validation;
-      if (validation.accuracy_threshold > 1 || validation.accuracy_threshold < 0) {
-        errors.push('accuracy_threshold must be between 0 and 1');
-      }
-    }
-
-    return {
-      valid: errors.length === 0,
-      errors
-    };
-  }
-
-  // Reset to default configuration
-  resetToDefault(): void {
-    this.currentConfig = JSON.parse(JSON.stringify(DEFAULT_RAG_CONFIG));
-  }
-
-  // Private helper method for deep merging configurations
-  private mergeConfigs(base: OracleRAGConfig, override: Partial<OracleRAGConfig>): OracleRAGConfig {
-    const merged = JSON.parse(JSON.stringify(base));
-    
-    // Simple deep merge - in production, would use a more sophisticated merging strategy
-    Object.keys(override).forEach(key => {
-      if (override[key as keyof OracleRAGConfig] !== undefined) {
-        if (typeof override[key as keyof OracleRAGConfig] === 'object' && !Array.isArray(override[key as keyof OracleRAGConfig])) {
-          merged[key] = { ...merged[key], ...override[key as keyof OracleRAGConfig] };
-        } else {
-          merged[key] = override[key as keyof OracleRAGConfig];
-        }
-      }
-    });
-    
-    return merged;
+    this.config = { ...this.config, ...overrides };
   }
 }
 
@@ -1650,5 +1543,3 @@ export const CONFIGURATION_PRESETS = {
   QUALITY_FOCUSED: 'quality_maximized',
   COMPREHENSIVE_ANALYSIS: 'comprehensive_mode'
 } as const;
-
-export default DEFAULT_RAG_CONFIG;

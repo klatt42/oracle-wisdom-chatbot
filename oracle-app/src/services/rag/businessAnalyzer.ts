@@ -4,8 +4,8 @@
  * Enhance RAG responses with intelligent business insights and strategic applications
  */
 
+import { BusinessQueryClassification } from '../../lib/advancedBusinessQueryClassifier';
 import { 
-  BusinessQueryClassification, 
   HormoziFramework, 
   IndustryVertical, 
   BusinessLifecycleStage,
@@ -357,15 +357,15 @@ export class OracleBusinessAnalyzer {
     }
 
     // Query intent indicators
-    const intent = queryClassification.classified_intent.primary_intent;
-    if (intent === 'strategy_planning') indicators.push('strategic_thinking');
-    if (intent === 'implementation_guidance') indicators.push('execution_focus');
-    if (intent === 'optimization_improvement') indicators.push('optimization_maturity');
-    if (intent === 'problem_solving') indicators.push('problem_solving_mode');
+    const intent = queryClassification.primary_intent.intent_type;
+    if (intent === UserIntent.PLANNING) indicators.push('strategic_thinking');
+    if (intent === UserIntent.IMPLEMENTATION) indicators.push('execution_focus');
+    if (intent === UserIntent.OPTIMIZATION) indicators.push('optimization_maturity');
+    if (intent === UserIntent.TROUBLESHOOTING) indicators.push('problem_solving_mode');
 
     // Framework sophistication indicators
     const frameworks = queryClassification.business_context.framework_relevance;
-    if (frameworks.some(f => f.framework === HormoziFramework.GRAND_SLAM_OFFER)) {
+    if (frameworks.some(f => f.framework === HormoziFramework.GRAND_SLAM_OFFERS)) {
       indicators.push('offer_optimization_focus');
     }
     if (frameworks.some(f => f.framework === HormoziFramework.CORE_FOUR)) {
@@ -374,10 +374,16 @@ export class OracleBusinessAnalyzer {
 
     // Financial metrics sophistication
     const financialFocus = queryClassification.business_context.financial_focus || [];
-    if (financialFocus.includes('LTV') || financialFocus.includes('CAC')) {
+    const hasLTVCAC = financialFocus.some(f => 
+      f.specific_metrics.includes('LTV') || f.specific_metrics.includes('CAC')
+    );
+    if (hasLTVCAC) {
       indicators.push('advanced_metrics_awareness');
     }
-    if (financialFocus.includes('unit economics')) {
+    const hasUnitEconomics = financialFocus.some(f => 
+      f.specific_metrics.includes('unit economics')
+    );
+    if (hasUnitEconomics) {
       indicators.push('unit_economics_sophistication');
     }
 
@@ -428,20 +434,23 @@ export class OracleBusinessAnalyzer {
     currentStage: BusinessLifecycleStage,
     indicators: string[]
   ): BusinessContextAnalysis['business_profile']['transition_readiness'] {
-    const stageProgression = {
-      'startup': 'growth',
-      'growth': 'scaling',
-      'scaling': 'maturity',
-      'maturity': 'maturity'
+    const stageProgression: Record<BusinessLifecycleStage, BusinessLifecycleStage> = {
+      [BusinessLifecycleStage.IDEATION]: BusinessLifecycleStage.STARTUP,
+      [BusinessLifecycleStage.STARTUP]: BusinessLifecycleStage.EARLY_SCALING,
+      [BusinessLifecycleStage.EARLY_SCALING]: BusinessLifecycleStage.SCALING,
+      [BusinessLifecycleStage.SCALING]: BusinessLifecycleStage.GROWTH,
+      [BusinessLifecycleStage.GROWTH]: BusinessLifecycleStage.ENTERPRISE,
+      [BusinessLifecycleStage.ENTERPRISE]: BusinessLifecycleStage.EXIT_PREP,
+      [BusinessLifecycleStage.EXIT_PREP]: BusinessLifecycleStage.EXIT_PREP
     };
 
-    const nextStage = stageProgression[currentStage] as BusinessLifecycleStage;
+    const nextStage = stageProgression[currentStage];
     let readinessScore = 0.3; // Base readiness
     const missingPrerequisites = [];
 
     // Assess readiness based on current stage
     switch (currentStage) {
-      case 'startup':
+      case BusinessLifecycleStage.STARTUP:
         if (indicators.includes('growing_revenue')) readinessScore += 0.3;
         else missingPrerequisites.push('Consistent revenue growth');
         
@@ -452,7 +461,7 @@ export class OracleBusinessAnalyzer {
         else missingPrerequisites.push('Strategic planning capabilities');
         break;
 
-      case 'growth':
+      case BusinessLifecycleStage.GROWTH:
         if (indicators.includes('scaling_revenue')) readinessScore += 0.3;
         else missingPrerequisites.push('Scalable revenue model');
         
@@ -463,7 +472,7 @@ export class OracleBusinessAnalyzer {
         else missingPrerequisites.push('Team expansion capabilities');
         break;
 
-      case 'scaling':
+      case BusinessLifecycleStage.SCALING:
         if (indicators.includes('advanced_metrics_awareness')) readinessScore += 0.3;
         else missingPrerequisites.push('Advanced analytics and metrics');
         
@@ -490,7 +499,7 @@ export class OracleBusinessAnalyzer {
   ): Promise<BusinessContextAnalysis['framework_application']> {
     const frameworkRelevance = queryClassification.business_context.framework_relevance;
     
-    let primaryFramework = HormoziFramework.GRAND_SLAM_OFFER;
+    let primaryFramework = HormoziFramework.GRAND_SLAM_OFFERS;
     let bestScore = 0;
 
     // Determine most applicable framework
@@ -628,15 +637,18 @@ export class OracleBusinessAnalyzer {
     // From query classification
     const financialFocus = queryClassification.business_context.financial_focus || [];
     for (const metric of financialFocus) {
-      metrics.push({
-        metric_name: metric,
-        metric_type: this.categorizeMetricType(metric),
-        detected_value: this.extractMetricValue(metric, userContext),
-        units: this.getMetricUnits(metric),
-        confidence_level: 0.8,
-        context_clues: [`Mentioned in query: ${metric}`],
-        validation_status: 'requires_clarification'
-      });
+      // For each specific metric within the FinancialFocus
+      for (const specificMetric of metric.specific_metrics) {
+        metrics.push({
+          metric_name: specificMetric,
+          metric_type: this.categorizeMetricType(specificMetric),
+          detected_value: this.extractMetricValue(specificMetric, userContext),
+          units: this.getMetricUnits(specificMetric),
+          confidence_level: 0.8,
+          context_clues: [`Mentioned in query: ${specificMetric}`],
+          validation_status: 'requires_clarification'
+        });
+      }
     }
 
     // From user context
@@ -798,9 +810,9 @@ export class OracleBusinessAnalyzer {
   // Initialize Framework Database
   private initializeFrameworkDatabase(): void {
     // Grand Slam Offer Framework Profile
-    this.frameworkDatabase.set(HormoziFramework.GRAND_SLAM_OFFER, {
-      optimal_stages: ['startup', 'growth'],
-      applicable_stages: ['startup', 'growth', 'scaling'],
+    this.frameworkDatabase.set(HormoziFramework.GRAND_SLAM_OFFERS, {
+      optimal_stages: [BusinessLifecycleStage.STARTUP, BusinessLifecycleStage.GROWTH],
+      applicable_stages: [BusinessLifecycleStage.STARTUP, BusinessLifecycleStage.GROWTH, BusinessLifecycleStage.SCALING],
       industry_fit: {
         'ecommerce': 0.9,
         'saas': 0.8,
@@ -822,8 +834,8 @@ export class OracleBusinessAnalyzer {
 
     // Core Four Framework Profile
     this.frameworkDatabase.set(HormoziFramework.CORE_FOUR, {
-      optimal_stages: ['growth', 'scaling'],
-      applicable_stages: ['growth', 'scaling', 'maturity'],
+      optimal_stages: [BusinessLifecycleStage.GROWTH, BusinessLifecycleStage.SCALING],
+      applicable_stages: [BusinessLifecycleStage.GROWTH, BusinessLifecycleStage.SCALING, BusinessLifecycleStage.ENTERPRISE],
       industry_fit: {
         'ecommerce': 0.95,
         'saas': 0.9,
@@ -854,8 +866,8 @@ export class OracleBusinessAnalyzer {
         pattern_name: 'SaaS Product-Led Growth',
         pattern_description: 'Successful SaaS companies that achieved rapid scaling through product-led growth strategies',
         business_contexts: {
-          applicable_stages: ['growth', 'scaling'],
-          applicable_industries: ['saas', 'technology'],
+          applicable_stages: [BusinessLifecycleStage.GROWTH, BusinessLifecycleStage.SCALING],
+          applicable_industries: [IndustryVertical.SOFTWARE_SAAS],
           business_size_range: '$50K-$500K MRR'
         },
         key_characteristics: [
@@ -865,7 +877,7 @@ export class OracleBusinessAnalyzer {
           'Viral coefficient > 0.5',
           'Net revenue retention > 110%'
         ],
-        implementation_framework: [HormoziFramework.CORE_FOUR, HormoziFramework.VALUE_LADDER],
+        implementation_framework: [HormoziFramework.CORE_FOUR, HormoziFramework.VALUE_EQUATION],
         historical_success_rate: 0.73,
         average_timeline_months: 18,
         typical_outcomes: {

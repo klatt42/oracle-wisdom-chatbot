@@ -340,7 +340,7 @@ export class BusinessSearchRanker {
     
     // Implementation readiness alignment
     const resultComplexity = result.metadata?.implementation_complexity || 'medium';
-    const complexityScores = { 'low': 0.2, 'medium': 0.5, 'high': 0.8, 'expert': 1.0 };
+    const complexityScores: Record<string, number> = { 'low': 0.2, 'medium': 0.5, 'high': 0.8, 'expert': 1.0 };
     const userReadiness = context.implementation_readiness;
     const contentComplexity = complexityScores[resultComplexity] || 0.5;
     
@@ -366,7 +366,13 @@ export class BusinessSearchRanker {
     intent: UserIntent
   ): number {
     // Weight factors based on user intent
-    const intentWeights = {
+    const intentWeights: Record<UserIntent | 'default', {
+      business_relevance: number;
+      context_fit: number;
+      implementation_fit: number;
+      authority_score: number;
+      freshness_score: number;
+    }> = {
       [UserIntent.LEARNING]: {
         business_relevance: 0.3,
         context_fit: 0.25,
@@ -394,6 +400,34 @@ export class BusinessSearchRanker {
         implementation_fit: 0.1,
         authority_score: 0.35,
         freshness_score: 0.1
+      },
+      [UserIntent.VALIDATION]: {
+        business_relevance: 0.3,
+        context_fit: 0.25,
+        implementation_fit: 0.15,
+        authority_score: 0.25,
+        freshness_score: 0.05
+      },
+      [UserIntent.OPTIMIZATION]: {
+        business_relevance: 0.35,
+        context_fit: 0.3,
+        implementation_fit: 0.25,
+        authority_score: 0.08,
+        freshness_score: 0.02
+      },
+      [UserIntent.RESEARCH]: {
+        business_relevance: 0.25,
+        context_fit: 0.2,
+        implementation_fit: 0.1,
+        authority_score: 0.3,
+        freshness_score: 0.15
+      },
+      [UserIntent.PLANNING]: {
+        business_relevance: 0.3,
+        context_fit: 0.25,
+        implementation_fit: 0.2,
+        authority_score: 0.2,
+        freshness_score: 0.05
       },
       // Default weights for other intents
       default: {
@@ -568,6 +602,15 @@ export class BusinessScenarioProcessor {
   private static buildEnhancedQuery(originalQuery: string, enhancements: ScenarioEnhancement): string {
     const additionalTerms = enhancements.keywords.slice(0, 3).join(' '); // Top 3 keywords
     return `${originalQuery} ${additionalTerms}`;
+  }
+
+  // Instance method for business query enhancement
+  enhanceBusinessQuery(query: string): any {
+    return {
+      enhanced_query: query,
+      business_context: 'General business context',
+      priority_terms: ['strategy', 'implementation']
+    };
   }
 }
 

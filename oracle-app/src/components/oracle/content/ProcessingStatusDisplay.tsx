@@ -96,6 +96,17 @@ const ProcessingStatusDisplay: React.FC<ProcessingStatusDisplayProps> = ({
     }
   };
 
+  const getStageStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending': return ClockIcon;
+      case 'active': 
+      case 'processing': return ArrowPathIcon;
+      case 'completed': return CheckCircleIcon;
+      case 'error': return ExclamationTriangleIcon;
+      default: return ClockIcon;
+    }
+  };
+
   const getStatusColor = (status: ProcessingJob['status']) => {
     switch (status) {
       case 'queued': return oracleTheme.colors.stardustGray;
@@ -644,7 +655,9 @@ const ProcessingStatusDisplay: React.FC<ProcessingStatusDisplayProps> = ({
                       title="View Content"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onJobView(job.id, job.contentId);
+                        if (job.contentId) {
+                          onJobView(job.id, job.contentId);
+                        }
                       }}
                     >
                       <EyeIcon width={16} height={16} />
@@ -691,7 +704,7 @@ const ProcessingStatusDisplay: React.FC<ProcessingStatusDisplayProps> = ({
               {isExpanded && job.stages.length > 0 && (
                 <div className="stages-list">
                   {job.stages.map((stage) => {
-                    const StageStatusIcon = getStatusIcon(stage.status);
+                    const StageStatusIcon = getStageStatusIcon(stage.status);
                     
                     return (
                       <div 

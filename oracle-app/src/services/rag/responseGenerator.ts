@@ -262,7 +262,7 @@ interface OraclePersonality {
 // Main Oracle Response Generator
 export class OracleResponseGenerator {
   private anthropic: Anthropic;
-  private oraclePersonality: OraclePersonality;
+  private oraclePersonality!: OraclePersonality;
   private responseCache: Map<string, GeneratedResponse> = new Map();
   private readonly CACHE_DURATION = 600000; // 10 minutes
 
@@ -1207,7 +1207,7 @@ Craft a response that embodies the Oracle's wisdom and mystique while delivering
         utilization_percentage: 1.0, // All sections used
         primary_sources_count: context.citation_chain.primary_sources.length,
         framework_coverage: context.framework_relationships.map(fr => fr.primary_framework.toString()),
-        citation_density: context.citation_chain.total_citations / context.context_sections.length
+        citation_density: (context.citation_chain.primary_sources.length + context.citation_chain.supporting_sources.length) / context.context_sections.length
       },
       quality_score: 0.87,
       business_relevance_score: 0.89

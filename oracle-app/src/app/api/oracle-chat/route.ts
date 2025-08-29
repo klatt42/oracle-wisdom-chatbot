@@ -5,12 +5,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { OracleChat, OracleChatOptions } from '@/lib/oracleChat';
+import { OracleChat, OracleChatOptions } from '../../../lib/oracleChat';
 import { 
   ApiResponse,
   WisdomSource,
-  ContentMetadata 
+  ContentMetadata,
+  OracleMessage
 } from '@/types/oracle';
+import { SearchResult } from '@/lib/oracleVectorDB';
 
 // Initialize Oracle chat instance
 let oracleChat: OracleChat | null = null;
@@ -64,11 +66,20 @@ export async function POST(request: NextRequest): Promise<NextResponse<ChatRespo
     
     const response = await oracle.generateResponse(message, chatOptions);
     
+    const responseMetadata: ContentMetadata = {
+      processed_at: new Date().toISOString(),
+      ...(response.metadata || {}),
+      searchQuery: response.metadata?.searchQuery || '',
+      searchResults: response.metadata?.searchResults || [],
+      wisdomSources: response.metadata?.wisdomSources || [],
+      timestamp: response.metadata?.timestamp || new Date().toISOString()
+    };
+
     return NextResponse.json({
       success: true,
       data: {
         message: response.content,
-        metadata: response.metadata,
+        metadata: responseMetadata,
         timestamp: new Date().toISOString()
       },
       metadata: {
@@ -96,7 +107,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ChatRespo
 }
 
 type HistoryResponse = ApiResponse<{
-  history: WisdomSource[];
+  history: OracleMessage[];
   count: number;
 }>;
 
@@ -107,13 +118,13 @@ type SuggestionsResponse = ApiResponse<{
 
 type InsightsResponse = ApiResponse<{
   category: string;
-  insights: WisdomSource[];
+  insights: SearchResult[];
   count: number;
 }>;
 
 type GetResponse = HistoryResponse | SuggestionsResponse | InsightsResponse;
 
-export async function GET(request: NextRequest): Promise<NextResponse<GetResponse>> {
+export async function GET(request: NextRequest): Promise<NextResponse<HistoryResponse | SuggestionsResponse | InsightsResponse>> {
   try {
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
@@ -129,7 +140,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<GetRespons
             history: history.slice(1), // Exclude system prompt
             count: history.length - 1
           }
-        });
+        } as HistoryResponse);
         
       case 'suggestions':
         const query = searchParams.get('query') || '';
@@ -140,7 +151,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<GetRespons
             suggestions,
             query
           }
-        });
+        } as SuggestionsResponse);
         
       case 'insights':
         const category = searchParams.get('category');
@@ -165,7 +176,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<GetRespons
             insights,
             count: insights.length
           }
-        });
+        } as InsightsResponse);
         
       default:
         return NextResponse.json(

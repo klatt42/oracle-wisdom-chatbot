@@ -501,7 +501,7 @@ export class ResponseRankingSystem {
     }
     
     // Sort by final score
-    const sortedCandidates = scoredCandidates.sort((a, b) => b.final_weighted_score - a.final_weighted_score);
+    const sortedCandidates = scoredCandidates.sort((a, b) => (b.final_weighted_score || 0) - (a.final_weighted_score || 0));
     
     // Convert to ranked responses
     const rankedResponses: RankedResponse[] = [];
@@ -512,11 +512,11 @@ export class ResponseRankingSystem {
         rank: i + 1,
         candidate_response: scored.candidate,
         ranking_scores: {
-          overall_score: scored.final_weighted_score,
+          overall_score: scored.final_weighted_score || 0,
           component_scores: scored.component_scores,
           normalized_scores: this.generateNormalizedScores(scored),
-          weighted_final_score: scored.final_weighted_score,
-          percentile_ranking: this.calculatePercentileRanking(scored.final_weighted_score, sortedCandidates)
+          weighted_final_score: scored.final_weighted_score || 0,
+          percentile_ranking: this.calculatePercentileRanking(scored.final_weighted_score || 0, sortedCandidates)
         },
         ranking_explanation: await this.generateRankingExplanation(scored, request),
         confidence_interval: this.calculateConfidenceInterval(scored, sortedCandidates),
@@ -699,8 +699,8 @@ export class ResponseRankingSystem {
   private calculateConfidenceInterval(scored: ScoredCandidate, candidates: ScoredCandidate[]): ConfidenceInterval {
     return {
       confidence_level: 0.85,
-      lower_bound: scored.final_weighted_score - 0.05,
-      upper_bound: scored.final_weighted_score + 0.05,
+      lower_bound: (scored.final_weighted_score || 0) - 0.05,
+      upper_bound: (scored.final_weighted_score || 0) + 0.05,
       uncertainty_sources: ['Limited source diversity'],
       confidence_factors: ['High source authority', 'Good business alignment']
     };

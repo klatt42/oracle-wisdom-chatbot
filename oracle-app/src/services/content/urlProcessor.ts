@@ -9,6 +9,13 @@ import fetch from 'node-fetch';
 import { URL } from 'url';
 import * as cheerio from 'cheerio';
 
+// Polyfill File API for server environment
+if (typeof globalThis.File === 'undefined') {
+  globalThis.File = class File {
+    constructor(public chunks: any[], public name: string, public options?: any) {}
+  } as any;
+}
+
 // Types
 import { 
   ContentItem, 
@@ -171,43 +178,58 @@ export class OracleUrlProcessor {
       }
     }
 
-    // Fetch the webpage
-    const response = await fetch(url, {
-      timeout,
-      headers: {
-        'User-Agent': userAgent,
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        ...headers
-      },
-      redirect: followRedirects ? 'follow' : 'manual'
-    });
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    try {
+      // Fetch the webpage
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': userAgent,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5',
+          'Accept-Encoding': 'gzip, deflate',
+          'Connection': 'keep-alive',
+          'Upgrade-Insecure-Requests': '1',
+          ...headers
+        },
+        redirect: followRedirects ? 'follow' : 'manual'
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('text/html')) {
+        throw new Error('URL does not return HTML content');
+      }
+
+      const html = await response.text();
+      
+      if (html.length > this.MAX_CONTENT_LENGTH) {
+        throw new Error('Content exceeds maximum length limit');
+      }
+
+      return this.parseHtmlContent(html, url);
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if ((error as Error).name === 'AbortError') {
+        throw new Error(`Request timed out after ${timeout}ms`);
+      }
+      throw error;
     }
-
-    const contentType = response.headers.get('content-type') || '';
-    if (!contentType.includes('text/html')) {
-      throw new Error('URL does not return HTML content');
-    }
-
-    const html = await response.text();
-    
-    if (html.length > this.MAX_CONTENT_LENGTH) {
-      throw new Error('Content exceeds maximum length limit');
-    }
-
-    return this.parseHtmlContent(html, url);
   }
 
   /**
    * Parse HTML content using Readability and Cheerio
    */
   private parseHtmlContent(html: string, url: string): ExtractedWebContent {
+    // Create JSDOM with minimal server-safe options
     const dom = new JSDOM(html, { url });
     const doc = dom.window.document;
     
@@ -223,24 +245,24 @@ export class OracleUrlProcessor {
     const $ = cheerio.load(html);
     
     // Extract metadata
-    const metadata = this.extractMetadata($);
+    const metadata = this.extractMetadata($ as any);
     const title = article.title || metadata.title || $('title').text().trim();
-    const author = metadata.author || this.extractAuthor($);
+    const author = metadata.author || this.extractAuthor($ as any);
     const publishedDate = metadata.publishedDate ? new Date(metadata.publishedDate) : undefined;
     const modifiedDate = metadata.modifiedDate ? new Date(metadata.modifiedDate) : undefined;
     
     // Calculate reading time (average 200 words per minute)
-    const wordCount = article.textContent.split(/\s+/).length;
+    const wordCount = (article.textContent || '').split(/\s+/).length;
     const readingTime = Math.ceil(wordCount / 200);
     
     // Extract images and links if needed
-    const images = this.extractImages($, url);
-    const links = this.extractLinks($, url);
+    const images = this.extractImages($ as any, url);
+    const links = this.extractLinks($ as any, url);
     
     return {
       title,
-      content: article.textContent,
-      excerpt: article.excerpt,
+      content: article.textContent || '',
+      excerpt: article.excerpt || '',
       author,
       publishedDate,
       modifiedDate,
@@ -395,30 +417,42 @@ export class OracleUrlProcessor {
   private async checkRobotsTxt(origin: string, pathname: string): Promise<boolean> {
     try {
       const robotsUrl = `${origin}/robots.txt`;
-      const response = await fetch(robotsUrl, { timeout: 5000 });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
       
-      if (!response.ok) {
-        return true; // If robots.txt doesn't exist, allow crawling
-      }
+      try {
+        const response = await fetch(robotsUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          return true; // If robots.txt doesn't exist, allow crawling
+        }
 
-      const robotsTxt = await response.text();
-      const lines = robotsTxt.split('\n').map(line => line.trim().toLowerCase());
-      
-      let userAgentSection = false;
-      
-      for (const line of lines) {
-        if (line.startsWith('user-agent:')) {
-          const userAgent = line.substring('user-agent:'.length).trim();
-          userAgentSection = userAgent === '*' || userAgent.includes('oracle');
-        } else if (userAgentSection && line.startsWith('disallow:')) {
-          const disallowPath = line.substring('disallow:'.length).trim();
-          if (disallowPath && pathname.startsWith(disallowPath)) {
-            return false;
+        const robotsTxt = await response.text();
+        const lines = robotsTxt.split('\n').map(line => line.trim().toLowerCase());
+        
+        let userAgentSection = false;
+        
+        for (const line of lines) {
+          if (line.startsWith('user-agent:')) {
+            const userAgent = line.substring('user-agent:'.length).trim();
+            userAgentSection = userAgent === '*' || userAgent.includes('oracle');
+          } else if (userAgentSection && line.startsWith('disallow:')) {
+            const disallowPath = line.substring('disallow:'.length).trim();
+            if (disallowPath && pathname.startsWith(disallowPath)) {
+              return false;
+            }
           }
         }
+        
+        return true;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if ((error as Error).name === 'AbortError') {
+          return true; // On timeout, allow crawling
+        }
+        return true; // On other errors, allow crawling
       }
-
-      return true;
     } catch {
       return true; // If we can't check robots.txt, allow crawling
     }
@@ -448,13 +482,7 @@ export class OracleUrlProcessor {
         createdDate: content.publishedDate,
         modifiedDate: content.modifiedDate,
         extractedText: content.content.substring(0, 1000), // Preview
-        businessRelevance,
-        siteName: content.siteName,
-        canonicalUrl: content.canonicalUrl,
-        readingTime: content.readingTime,
-        images: content.images?.length || 0,
-        links: content.links?.length || 0,
-        webMetadata: content.metadata
+        businessRelevance
       }
     };
 
@@ -481,8 +509,7 @@ export class OracleUrlProcessor {
       extractedText: content.content,
       summary: content.excerpt || content.content.substring(0, 500),
       framework: frameworks.map(f => f.framework),
-      keywords: this.extractKeywords(text),
-      businessConcepts
+      keywords: this.extractKeywords(text)
     };
   }
 

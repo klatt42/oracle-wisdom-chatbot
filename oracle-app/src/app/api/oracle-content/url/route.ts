@@ -4,12 +4,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { urlProcessor } from '../../../../lib/content-processing/url-processor';
-import { UrlScraper } from '../../../../lib/content-processing/url-scraper';
 
 // POST /api/oracle-content/url
 export async function POST(request: NextRequest) {
   try {
+    // Dynamically import the modules to avoid server-side issues
+    const { urlProcessor } = await import('../../../../lib/content-processing/url-processor');
+    const { UrlScraper } = await import('../../../../lib/content-processing/url-scraper');
+    
     const { urls, options = {} } = await request.json();
 
     // Validate request
@@ -65,7 +67,7 @@ export async function POST(request: NextRequest) {
       results: results.map((result, index) => ({
         url: urls[index],
         success: result.success,
-        contentId: result.contentId,
+        title: result.title,
         error: result.error,
         metadata: result.metadata
       }))
@@ -85,6 +87,9 @@ export async function POST(request: NextRequest) {
 // GET /api/oracle-content/url?jobId=xxx
 export async function GET(request: NextRequest) {
   try {
+    // Dynamically import the modules to avoid server-side issues
+    const { urlProcessor } = await import('../../../../lib/content-processing/url-processor');
+    
     const { searchParams } = new URL(request.url);
     const jobId = searchParams.get('jobId');
 
@@ -123,6 +128,9 @@ export async function GET(request: NextRequest) {
 // PUT /api/oracle-content/url/validate
 export async function PUT(request: NextRequest) {
   try {
+    // Dynamically import the modules to avoid server-side issues
+    const { UrlScraper } = await import('../../../../lib/content-processing/url-scraper');
+    
     const { url } = await request.json();
 
     if (!url || typeof url !== 'string') {

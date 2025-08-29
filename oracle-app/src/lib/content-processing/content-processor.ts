@@ -85,7 +85,7 @@ export class ContentProcessor {
         totalChunks: 0,
         totalWords: 0,
         processingTime: Date.now() - startTime,
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -269,7 +269,7 @@ export class ContentProcessor {
       
     } catch (error) {
       console.error('Failed to store chunks:', error);
-      throw new Error(`Chunk storage failed: ${error.message}`);
+      throw new Error(`Chunk storage failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -311,7 +311,7 @@ export class ContentProcessor {
       return response.data.map(item => item.embedding);
     } catch (error) {
       console.error('Embedding generation failed:', error);
-      throw new Error(`Failed to generate embeddings: ${error.message}`);
+      throw new Error(`Failed to generate embeddings: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 }

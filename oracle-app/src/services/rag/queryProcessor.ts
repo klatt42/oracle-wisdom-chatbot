@@ -830,9 +830,9 @@ export class OracleQueryProcessor {
       primary_term: 'revenue',
       business_synonyms: ['sales', 'income', 'earnings', 'turnover', 'gross receipts'],
       industry_variants: new Map([
-        [IndustryVertical.SAAS, ['arr', 'mrr', 'recurring revenue']],
+        [IndustryVertical.SOFTWARE_SAAS, ['arr', 'mrr', 'recurring revenue']],
         [IndustryVertical.ECOMMERCE, ['gross sales', 'net sales', 'order volume']],
-        [IndustryVertical.CONSULTING, ['billings', 'fee income', 'professional services revenue']]
+        [IndustryVertical.PROFESSIONAL_SERVICES, ['billings', 'fee income', 'professional services revenue']]
       ]),
       stage_specific_terms: new Map([
         [BusinessLifecycleStage.STARTUP, ['initial revenue', 'first sales', 'revenue validation']],
@@ -857,7 +857,7 @@ export class OracleQueryProcessor {
       primary_term: 'growth',
       business_synonyms: ['expansion', 'scaling', 'increase', 'development', 'progress'],
       industry_variants: new Map([
-        [IndustryVertical.SAAS, ['user growth', 'subscription growth', 'account expansion']],
+        [IndustryVertical.SOFTWARE_SAAS, ['user growth', 'subscription growth', 'account expansion']],
         [IndustryVertical.ECOMMERCE, ['order growth', 'customer growth', 'market expansion']]
       ]),
       stage_specific_terms: new Map([
@@ -918,20 +918,31 @@ export class OracleQueryProcessor {
 
   private getStageSpecificTerms(stage: BusinessLifecycleStage): string[] {
     const stageTerms = {
+      [BusinessLifecycleStage.IDEATION]: ['business concept', 'market validation', 'idea development', 'feasibility'],
       [BusinessLifecycleStage.STARTUP]: ['mvp', 'validation', 'product market fit', 'early traction'],
+      [BusinessLifecycleStage.EARLY_SCALING]: ['initial systems', 'foundation building', 'basic processes', 'team formation'],
       [BusinessLifecycleStage.SCALING]: ['growth systems', 'process optimization', 'team building', 'infrastructure'],
-      [BusinessLifecycleStage.ESTABLISHED]: ['market leadership', 'competitive advantage', 'operational excellence'],
-      [BusinessLifecycleStage.EXPANSION]: ['new markets', 'diversification', 'strategic partnerships']
+      [BusinessLifecycleStage.GROWTH]: ['market expansion', 'advanced systems', 'geographic expansion', 'diversification'],
+      [BusinessLifecycleStage.ENTERPRISE]: ['market leadership', 'competitive advantage', 'operational excellence'],
+      [BusinessLifecycleStage.EXIT_PREP]: ['acquisition readiness', 'legacy building', 'valuation optimization', 'succession planning']
     };
     return stageTerms[stage] || [];
   }
 
   private getIndustrySpecificTerms(industry: IndustryVertical): string[] {
     const industryTerms = {
-      [IndustryVertical.SAAS]: ['subscription', 'churn', 'mrr', 'user onboarding'],
+      [IndustryVertical.FITNESS_GYMS]: ['membership', 'personal training', 'retention', 'workout plans'],
+      [IndustryVertical.SOFTWARE_SAAS]: ['subscription', 'churn', 'mrr', 'user onboarding'],
       [IndustryVertical.ECOMMERCE]: ['cart abandonment', 'conversion rate', 'average order value', 'inventory'],
-      [IndustryVertical.CONSULTING]: ['utilization rate', 'billable hours', 'client retention', 'expertise'],
-      [IndustryVertical.PROFESSIONAL_SERVICES]: ['project management', 'client satisfaction', 'service delivery']
+      [IndustryVertical.PROFESSIONAL_SERVICES]: ['utilization rate', 'billable hours', 'client retention', 'expertise'],
+      [IndustryVertical.REAL_ESTATE]: ['listings', 'commission', 'closing rate', 'market analysis'],
+      [IndustryVertical.MANUFACTURING]: ['production efficiency', 'quality control', 'supply chain', 'cost optimization'],
+      [IndustryVertical.HEALTHCARE]: ['patient satisfaction', 'appointment scheduling', 'compliance', 'outcomes'],
+      [IndustryVertical.EDUCATION]: ['enrollment', 'completion rates', 'student satisfaction', 'curriculum development'],
+      [IndustryVertical.FINANCIAL_SERVICES]: ['compliance', 'risk management', 'client acquisition', 'portfolio management'],
+      [IndustryVertical.RETAIL]: ['foot traffic', 'inventory turnover', 'customer experience', 'seasonal trends'],
+      [IndustryVertical.RESTAURANTS]: ['table turnover', 'food cost', 'customer satisfaction', 'menu optimization'],
+      [IndustryVertical.GENERAL]: ['customer satisfaction', 'operational efficiency', 'growth metrics', 'competitive positioning']
     };
     return industryTerms[industry] || [];
   }

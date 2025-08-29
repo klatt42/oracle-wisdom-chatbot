@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import RAGQueryEngine from '@/lib/ragQueryEngine';
+import RAGQueryEngine from '../../../lib/ragQueryEngine';
 import QueryPreprocessor, { 
   QueryPreprocessingRequest, 
   UserContextData, 
@@ -380,7 +380,7 @@ class OracleRAGService {
         business_scenarios: processedQuery.business_context.business_scenarios,
         implementation_focus: processedQuery.business_context.implementation_signals.length > 0,
         urgency_level: processedQuery.business_context.urgency_indicators.length > 0 ? 'high' : 'medium',
-        complexity_preference: request.user_context?.experience_level || 'intermediate'
+        complexity_preference: request.user_context?.experience_level === 'expert' ? 'advanced' : (request.user_context?.experience_level || 'intermediate')
       },
       source_chunks: searchResults,
       assembly_strategy: {
@@ -393,7 +393,7 @@ class OracleRAGService {
       quality_requirements: {
         minimum_source_count: 2,
         maximum_response_length: this.determineMaxResponseLength(request.response_preferences?.response_length),
-        citation_density: request.user_context?.user_preferences?.citation_detail || 'moderate',
+        citation_density: request.user_context?.user_preferences?.citation_detail === 'minimal' ? 'sparse' : (request.user_context?.user_preferences?.citation_detail === 'comprehensive' ? 'detailed' : 'moderate'),
         actionability_level: request.response_preferences?.focus_on_actionability ? 'tactical' : 'strategic',
         evidence_strength: 'moderate',
         consistency_threshold: 0.8

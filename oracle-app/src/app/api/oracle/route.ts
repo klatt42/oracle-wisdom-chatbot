@@ -69,27 +69,13 @@ function formatWisdomForPrompt(wisdomResults: WisdomMatch[]): string {
   wisdomResults.forEach((wisdom, index) => {
     wisdomContent += `\n${index + 1}. `;
     
-    // Handle legacy wisdom format
-    if (wisdom.source_type === 'legacy_wisdom') {
-      wisdomContent += `SOURCE: ${wisdom.source}`;
-      if (wisdom.book) wisdomContent += ` | BOOK: ${wisdom.book}`;
-      if (wisdom.chapter) wisdomContent += ` | CHAPTER: ${wisdom.chapter}`;
-      if (wisdom.framework) wisdomContent += ` | FRAMEWORK: ${wisdom.framework}`;
-      wisdomContent += `\nCONTENT: ${wisdom.content}\n`;
-    }
-    // Handle processed content format
-    else if (wisdom.source_type === 'processed_content') {
-      wisdomContent += `SOURCE: ${wisdom.content_title} (${wisdom.content_type})`;
-      if (wisdom.detected_frameworks && wisdom.detected_frameworks.length > 0) {
-        wisdomContent += ` | FRAMEWORKS: ${wisdom.detected_frameworks.join(', ')}`;
-      }
-      wisdomContent += `\nCONTENT: ${wisdom.text_content}\n`;
-    }
-    // Fallback for unknown formats
-    else {
-      wisdomContent += `SOURCE: ${wisdom.source || wisdom.content_title || 'Unknown'}`;
-      wisdomContent += `\nCONTENT: ${wisdom.content || wisdom.text_content}\n`;
-    }
+    // Handle wisdom with metadata
+    wisdomContent += `SOURCE: ${wisdom.metadata?.source || 'Unknown'}`;
+    if (wisdom.metadata?.book) wisdomContent += ` | BOOK: ${wisdom.metadata.book}`;
+    if (wisdom.metadata?.chapter) wisdomContent += ` | CHAPTER: ${wisdom.metadata.chapter}`;
+    if (wisdom.metadata?.framework) wisdomContent += ` | FRAMEWORK: ${wisdom.metadata.framework}`;
+    if (wisdom.title) wisdomContent += ` | TITLE: ${wisdom.title}`;
+    wisdomContent += `\nCONTENT: ${wisdom.content}\n`;
   });
   
   wisdomContent += '\nUse this knowledge to enhance your Oracle response with both established wisdom and fresh insights while maintaining your mystical persona.\n';
@@ -103,40 +89,21 @@ function generateCitationsFromWisdom(wisdomResults: WisdomMatch[]): string[] {
   wisdomResults.forEach(wisdom => {
     let citation = '';
     
-    // Handle legacy wisdom format
-    if (wisdom.source_type === 'legacy_wisdom') {
-      if (wisdom.book && wisdom.chapter) {
-        citation = `${wisdom.book} - Alex Hormozi, ${wisdom.chapter}`;
-      } else if (wisdom.framework) {
-        citation = `Alex Hormozi's ${wisdom.framework} Framework`;
-      } else if (wisdom.source.includes('business-frameworks')) {
-        citation = 'Business Frameworks - Alex Hormozi Methodologies';
-      } else if (wisdom.source.includes('success-patterns')) {
-        citation = 'Success Patterns - Proven Hormozi Strategies';
-      } else if (wisdom.source.includes('implementation-guides')) {
-        citation = 'Implementation Guide - Alex Hormozi Business Building';
-      } else {
-        citation = 'Alex Hormozi Business Wisdom - Oracle Knowledge Base';
-      }
-    }
-    // Handle processed content format
-    else if (wisdom.source_type === 'processed_content') {
-      const contentType = wisdom.content_type;
-      const title = wisdom.content_title || 'Unknown Source';
-      
-      if (contentType === 'url') {
-        citation = `Web Content: ${title}`;
-      } else if (contentType === 'youtube') {
-        citation = `YouTube Video: ${title}`;
-      } else if (contentType === 'file') {
-        citation = `Document: ${title}`;
-      } else {
-        citation = `Oracle Knowledge Base: ${title}`;
-      }
-    }
-    // Fallback
-    else {
-      citation = `Oracle Knowledge Base: ${wisdom.source || wisdom.content_title || 'Business Wisdom'}`;
+    // Generate citation based on wisdom metadata
+    if (wisdom.metadata?.book && wisdom.metadata?.chapter) {
+      citation = `${wisdom.metadata.book} - Alex Hormozi, ${wisdom.metadata.chapter}`;
+    } else if (wisdom.metadata?.framework) {
+      citation = `Alex Hormozi's ${wisdom.metadata.framework} Framework`;
+    } else if (wisdom.metadata?.source?.includes('business-frameworks')) {
+      citation = 'Business Frameworks - Alex Hormozi Methodologies';
+    } else if (wisdom.metadata?.source?.includes('success-patterns')) {
+      citation = 'Success Patterns - Proven Hormozi Strategies';
+    } else if (wisdom.metadata?.source?.includes('implementation-guides')) {
+      citation = 'Implementation Guide - Alex Hormozi Business Building';
+    } else if (wisdom.title) {
+      citation = `Oracle Knowledge Base: ${wisdom.title}`;
+    } else {
+      citation = 'Alex Hormozi Business Wisdom - Oracle Knowledge Base';
     }
     
     if (!citations.includes(citation)) {

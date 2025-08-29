@@ -26,7 +26,7 @@ interface EmbeddingReport {
 }
 
 class OracleEmbeddingProcessor {
-  private vectorDB: OracleVectorDB;
+  public vectorDB: OracleVectorDB;
   private knowledgeBaseDir: string;
 
   constructor() {

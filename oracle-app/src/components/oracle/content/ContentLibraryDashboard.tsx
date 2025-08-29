@@ -22,7 +22,8 @@ import {
   CloudArrowUpIcon,
   AdjustmentsHorizontalIcon,
   SparklesIcon,
-  StarIcon
+  StarIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 
 interface ContentItem {
@@ -93,6 +94,98 @@ const ContentLibraryDashboard: React.FC<ContentLibraryDashboardProps> = ({
   useEffect(() => {
     loadContentItems();
   }, []);
+
+  // Apply filters and search function
+  const applyFiltersAndSearch = useCallback(() => {
+    let filtered = [...contentItems];
+
+    // Apply search
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(item =>
+        item.title.toLowerCase().includes(query) ||
+        item.metadata.summary?.toLowerCase().includes(query) ||
+        item.metadata.tags?.some(tag => tag.toLowerCase().includes(query)) ||
+        item.metadata.framework?.some(fw => fw.toLowerCase().includes(query))
+      );
+    }
+
+    // Apply type filter
+    if (filters.type !== 'all') {
+      filtered = filtered.filter(item => item.type === filters.type);
+    }
+
+    // Apply framework filter
+    if (filters.framework !== 'all') {
+      filtered = filtered.filter(item =>
+        item.metadata.framework?.includes(filters.framework)
+      );
+    }
+
+    // Apply quality filter
+    if (filters.quality !== 'all') {
+      const qualityRanges = {
+        high: [80, 100],
+        medium: [60, 80],
+        low: [0, 60]
+      };
+      const [min, max] = qualityRanges[filters.quality];
+      filtered = filtered.filter(item => {
+        const quality = item.metadata.quality || 0;
+        return quality >= min && quality < max;
+      });
+    }
+
+    // Apply date range filter
+    if (filters.dateRange !== 'all') {
+      const now = new Date();
+      const ranges = {
+        today: 1,
+        week: 7,
+        month: 30,
+        year: 365
+      };
+      const days = ranges[filters.dateRange];
+      const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+      filtered = filtered.filter(item => item.uploadedAt >= cutoff);
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (filters.sortBy) {
+        case 'date':
+          aValue = a.uploadedAt.getTime();
+          bValue = b.uploadedAt.getTime();
+          break;
+        case 'quality':
+          aValue = a.metadata.quality || 0;
+          bValue = b.metadata.quality || 0;
+          break;
+        case 'relevance':
+          aValue = a.metadata.businessRelevance?.overallScore || 0;
+          bValue = b.metadata.businessRelevance?.overallScore || 0;
+          break;
+        case 'title':
+          aValue = a.title.toLowerCase();
+          bValue = b.title.toLowerCase();
+          break;
+        default:
+          aValue = a.uploadedAt.getTime();
+          bValue = b.uploadedAt.getTime();
+      }
+
+      if (filters.sortOrder === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+
+    setFilteredItems(filtered);
+    setCurrentPage(1);
+  }, [contentItems, searchQuery, filters]);
 
   // Apply filters and search
   useEffect(() => {
@@ -187,97 +280,6 @@ const ContentLibraryDashboard: React.FC<ContentLibraryDashboardProps> = ({
       setLoading(false);
     }
   };
-
-  const applyFiltersAndSearch = useCallback(() => {
-    let filtered = [...contentItems];
-
-    // Apply search
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(item =>
-        item.title.toLowerCase().includes(query) ||
-        item.metadata.summary?.toLowerCase().includes(query) ||
-        item.metadata.tags?.some(tag => tag.toLowerCase().includes(query)) ||
-        item.metadata.framework?.some(fw => fw.toLowerCase().includes(query))
-      );
-    }
-
-    // Apply type filter
-    if (filters.type !== 'all') {
-      filtered = filtered.filter(item => item.type === filters.type);
-    }
-
-    // Apply framework filter
-    if (filters.framework !== 'all') {
-      filtered = filtered.filter(item =>
-        item.metadata.framework?.includes(filters.framework)
-      );
-    }
-
-    // Apply quality filter
-    if (filters.quality !== 'all') {
-      const qualityRanges = {
-        high: [80, 100],
-        medium: [60, 80],
-        low: [0, 60]
-      };
-      const [min, max] = qualityRanges[filters.quality];
-      filtered = filtered.filter(item => {
-        const quality = item.metadata.quality || 0;
-        return quality >= min && quality < max;
-      });
-    }
-
-    // Apply date range filter
-    if (filters.dateRange !== 'all') {
-      const now = new Date();
-      const ranges = {
-        today: 1,
-        week: 7,
-        month: 30,
-        year: 365
-      };
-      const days = ranges[filters.dateRange];
-      const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-      filtered = filtered.filter(item => item.uploadedAt >= cutoff);
-    }
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      let aValue, bValue;
-      
-      switch (filters.sortBy) {
-        case 'date':
-          aValue = a.uploadedAt.getTime();
-          bValue = b.uploadedAt.getTime();
-          break;
-        case 'quality':
-          aValue = a.metadata.quality || 0;
-          bValue = b.metadata.quality || 0;
-          break;
-        case 'relevance':
-          aValue = a.metadata.businessRelevance?.overallScore || 0;
-          bValue = b.metadata.businessRelevance?.overallScore || 0;
-          break;
-        case 'title':
-          aValue = a.title.toLowerCase();
-          bValue = b.title.toLowerCase();
-          break;
-        default:
-          aValue = a.uploadedAt.getTime();
-          bValue = b.uploadedAt.getTime();
-      }
-
-      if (filters.sortOrder === 'asc') {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
-    });
-
-    setFilteredItems(filtered);
-    setCurrentPage(1);
-  }, [contentItems, searchQuery, filters]);
 
   const getTypeIcon = (type: ContentItem['type']) => {
     switch (type) {

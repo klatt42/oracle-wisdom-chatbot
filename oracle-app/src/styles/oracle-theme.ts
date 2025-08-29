@@ -209,7 +209,7 @@ export const oracleTheme = {
 };
 
 // CSS-in-JS Helper Functions
-export const getOracleGradient = (type: keyof typeof oracleTheme.colors) => {
+export const getOracleGradient = (type: 'primaryGradient' | 'goldGradient' | 'cosmicGradient') => {
   const gradients = {
     primaryGradient: oracleTheme.colors.primaryGradient,
     goldGradient: oracleTheme.colors.goldGradient,

@@ -540,6 +540,39 @@ export class AdvancedBusinessQueryClassifier {
     ]);
   }
 
+  private initializeIndustryKeywords(): void {
+    this.industryKeywords.set(IndustryVertical.FITNESS_GYMS, [
+      'gym', 'fitness', 'personal trainer', 'membership', 'workout', 'training', 'exercise'
+    ]);
+    this.industryKeywords.set(IndustryVertical.SOFTWARE_SAAS, [
+      'saas', 'software', 'subscription', 'mrr', 'arr', 'churn', 'retention', 'platform'
+    ]);
+    this.industryKeywords.set(IndustryVertical.ECOMMERCE, [
+      'ecommerce', 'online store', 'shopify', 'product sales', 'inventory', 'shipping'
+    ]);
+    this.industryKeywords.set(IndustryVertical.PROFESSIONAL_SERVICES, [
+      'consulting', 'services', 'billable hours', 'client work', 'professional'
+    ]);
+    this.industryKeywords.set(IndustryVertical.REAL_ESTATE, [
+      'real estate', 'property', 'listings', 'agents', 'commission', 'closing'
+    ]);
+  }
+
+  private initializeStageIndicators(): void {
+    this.stageIndicators.set(BusinessLifecycleStage.STARTUP, [
+      'startup', 'early stage', 'mvp', 'product market fit', 'bootstrapping', 'seed funding'
+    ]);
+    this.stageIndicators.set(BusinessLifecycleStage.SCALING, [
+      'scaling', 'growth', 'expanding', 'hiring', 'systems', 'processes'
+    ]);
+    this.stageIndicators.set(BusinessLifecycleStage.ENTERPRISE, [
+      'enterprise', 'large scale', 'corporate', 'established', 'mature business'
+    ]);
+    this.stageIndicators.set(BusinessLifecycleStage.GROWTH, [
+      'growth phase', 'expansion', 'market expansion', 'geographic expansion'
+    ]);
+  }
+
   private initializeFrameworkSignatures(): void {
     this.frameworkSignatures.set(HormoziFramework.GRAND_SLAM_OFFERS, {
       direct_mentions: ['grand slam offer', 'grand slam offers', 'gso'],

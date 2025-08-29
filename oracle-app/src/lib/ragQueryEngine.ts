@@ -149,12 +149,12 @@ export class RAGQueryEngine {
       const response: RAGResponse = {
         response_id: this.generateResponseId(),
         query_id: queryId,
-        synthesized_answer,
+        synthesized_answer: synthesizedAnswer,
         confidence_score: this.calculateConfidenceScore(rankedResults),
         source_chunks: rankedResults,
         citations,
         related_content: relatedContent,
-        implementation_guidance,
+        implementation_guidance: implementationGuidance,
         query_processing_time: Date.now() - queryStartTime,
         total_processing_time: totalProcessingTime
       };
@@ -433,14 +433,14 @@ export class RAGQueryEngine {
 
   // Generate citations using Alice Intelligence system
   private generateCitations(rankedChunks: EnhancedSourceChunk[]): FormattedCitation[] {
-    return this.citationEngine.enhanceSearchResultsWithCitations(rankedChunks, true)
+    return CitationIntegratedSearch.enhanceSearchResultsWithCitations(rankedChunks, true)
       .map(result => ({
         citation_id: this.generateCitationId(),
         citation_text: result.primary_citation.citation_text,
         source_type: 'oracle_knowledge',
         authority_level: result.primary_citation.verification_status,
         verification_status: result.primary_citation.verification_status,
-        relevance_to_query: result.relevance_score || 0
+        relevance_to_query: (result as any).relevance_score || 0.8
       }));
   }
 

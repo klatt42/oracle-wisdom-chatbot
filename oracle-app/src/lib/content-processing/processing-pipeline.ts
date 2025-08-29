@@ -120,7 +120,7 @@ export class ProcessingPipeline {
 
     } catch (error) {
       console.error(`Content processing failed: ${jobId}`, error);
-      await this.updateJobStatus(jobId, 'failed', 0, error.message);
+      await this.updateJobStatus(jobId, 'failed', 0, error instanceof Error ? error.message : String(error));
       throw error;
     }
   }
@@ -213,13 +213,13 @@ export class ProcessingPipeline {
 
     // Update job with results
     const job = this.activeJobs.get(jobId)!;
-    job.contentId = result.contentId;
+    job.contentId = result.content; // UrlProcessingResult uses 'content' not 'contentId'
     job.metadata = {
-      title: result.metadata?.title,
-      wordCount: result.metadata?.wordCount,
-      quality: result.metadata?.quality,
-      frameworks: result.metadata?.frameworks,
-      processingTime: result.metadata?.processingTime
+      title: result.title,
+      wordCount: result.metadata?.word_count,
+      quality: result.quality_metrics?.content_quality_score,
+      frameworks: result.metadata?.keywords, // Use keywords as frameworks approximation
+      processingTime: Date.now() - job.startTime.getTime()
     };
 
     await this.completeAllStages(jobId);
@@ -243,13 +243,14 @@ export class ProcessingPipeline {
 
     // Update job with results
     const job = this.activeJobs.get(jobId)!;
-    job.contentId = result.contentId;
+    job.contentId = (result as any).contentId; // Type assertion for YouTubeProcessingResult
+    const resultData = result as any; // Type assertion for YouTubeProcessingResult
     job.metadata = {
-      title: result.metadata?.title,
-      wordCount: result.metadata?.transcriptWordCount,
-      quality: result.metadata?.quality,
-      frameworks: result.metadata?.frameworks,
-      processingTime: result.metadata?.processingTime
+      title: resultData.metadata?.title,
+      wordCount: resultData.metadata?.transcriptWordCount,
+      quality: resultData.metadata?.quality,
+      frameworks: resultData.metadata?.frameworks,
+      processingTime: resultData.metadata?.processingTime
     };
 
     await this.completeAllStages(jobId);

@@ -59,33 +59,6 @@ const FileUploadInterface: React.FC<FileUploadInterfaceProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const newFiles: FileUploadItem[] = acceptedFiles.map(file => ({
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      file,
-      status: 'pending' as const,
-      progress: 0,
-      preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined
-    }));
-
-    setUploadedFiles(prev => [...prev, ...newFiles]);
-    
-    // Start upload process
-    await processFiles(newFiles);
-  }, [processFiles]);
-
-  const { getRootProps, getInputProps, isDragAccept, isDragReject } = useDropzone({
-    onDrop,
-    accept: acceptedFileTypes.reduce((acc, type) => {
-      acc[type] = ACCEPTED_FILE_TYPES[type] || [];
-      return acc;
-    }, {} as Record<string, string[]>),
-    maxSize: maxFileSize,
-    maxFiles: maxFiles - uploadedFiles.length,
-    onDragEnter: () => setIsDragActive(true),
-    onDragLeave: () => setIsDragActive(false)
-  });
-
   const processFiles = async (files: FileUploadItem[]) => {
     setIsUploading(true);
     
@@ -159,6 +132,33 @@ const FileUploadInterface: React.FC<FileUploadInterfaceProps> = ({
     setIsUploading(false);
     onFilesUploaded(uploadedFiles);
   };
+
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    const newFiles: FileUploadItem[] = acceptedFiles.map(file => ({
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      file,
+      status: 'pending' as const,
+      progress: 0,
+      preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined
+    }));
+
+    setUploadedFiles(prev => [...prev, ...newFiles]);
+    
+    // Start upload process
+    await processFiles(newFiles);
+  }, [processFiles]);
+
+  const { getRootProps, getInputProps, isDragAccept, isDragReject } = useDropzone({
+    onDrop,
+    accept: acceptedFileTypes.reduce((acc, type) => {
+      acc[type] = (ACCEPTED_FILE_TYPES as Record<string, string[]>)[type] || [];
+      return acc;
+    }, {} as Record<string, string[]>),
+    maxSize: maxFileSize,
+    maxFiles: maxFiles - uploadedFiles.length,
+    onDragEnter: () => setIsDragActive(true),
+    onDragLeave: () => setIsDragActive(false)
+  });
 
   const removeFile = (fileId: string) => {
     const fileToRemove = uploadedFiles.find(f => f.id === fileId);

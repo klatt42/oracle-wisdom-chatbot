@@ -345,9 +345,9 @@ export class OracleVectorSearchService {
         results = await this.executeComprehensiveSearch(
           searchQuery,
           queryClassification,
-          financialExpansion,
           maxResults,
-          similarityThreshold
+          similarityThreshold,
+          financialExpansion
         );
         break;
     }
@@ -387,7 +387,8 @@ export class OracleVectorSearchService {
         supabaseQuery = this.applyBusinessFilters(supabaseQuery, businessFilters);
       }
 
-      const { data, error } = await supabaseQuery.rpc('similarity_search', {
+      // Use RPC for similarity search instead of trying to call it on a query builder
+      const { data, error } = await this.supabase.rpc('similarity_search', {
         query_embedding: queryEmbedding,
         similarity_threshold: similarityThreshold,
         match_count: maxResults
@@ -456,9 +457,9 @@ export class OracleVectorSearchService {
   private async executeComprehensiveSearch(
     searchQuery: VectorSearchQuery,
     queryClassification: BusinessQueryClassification,
-    financialExpansion?: FinancialMetricsExpansion,
     maxResults: number,
-    similarityThreshold: number
+    similarityThreshold: number,
+    financialExpansion?: FinancialMetricsExpansion
   ): Promise<VectorSearchResult[]> {
 
     const allResults: VectorSearchResult[] = [];

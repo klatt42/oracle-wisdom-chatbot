@@ -88,18 +88,6 @@ const OracleContentManagementSystem: React.FC = () => {
     };
   }, []);
 
-  // Auto-switch to status tab when processing starts
-  useEffect(() => {
-    const hasActiveJobs = processingJobs.some(job => 
-      job.status === 'queued' || job.status === 'processing'
-    );
-    
-    if (hasActiveJobs && activeTab !== 'status') {
-      // Gentle nudge to status tab with notification
-      addNotification('info', 'Content processing started. Switch to Status tab to monitor progress.');
-    }
-  }, [processingJobs, activeTab, addNotification]);
-
   const addNotification = useCallback((type: 'success' | 'error' | 'info', message: string) => {
     const notification = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -115,6 +103,18 @@ const OracleContentManagementSystem: React.FC = () => {
       setNotifications(prev => prev.filter(n => n.id !== notification.id));
     }, 5000);
   }, []);
+
+  // Auto-switch to status tab when processing starts
+  useEffect(() => {
+    const hasActiveJobs = processingJobs.some(job => 
+      job.status === 'queued' || job.status === 'processing'
+    );
+    
+    if (hasActiveJobs && activeTab !== 'status') {
+      // Gentle nudge to status tab with notification
+      addNotification('info', 'Content processing started. Switch to Status tab to monitor progress.');
+    }
+  }, [processingJobs, activeTab, addNotification]);
 
   const createProcessingStages = (type: 'file' | 'url' | 'youtube'): ProcessingStage[] => {
     const commonStages = [

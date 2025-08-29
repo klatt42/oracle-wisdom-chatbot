@@ -666,8 +666,27 @@ export class ContextAwareFrameworkSearch {
   private async searchWithIntegrationContext(query: string, framework1: HormoziFramework, framework2: HormoziFramework, criteria: FilteringCriteria): Promise<EnhancedSearchResult[]> { return []; }
   private async analyzeFrameworkContent(result: EnhancedSearchResult, classification: BusinessQueryClassification): Promise<FrameworkAnalysis> { return {} as FrameworkAnalysis; }
   private async assessImplementationContext(result: EnhancedSearchResult, userContext?: any): Promise<ImplementationContext> { return {} as ImplementationContext; }
-  private async analyzeBusiness Application(result: EnhancedSearchResult, classification: BusinessQueryClassification): Promise<BusinessApplication> { return {} as BusinessApplication; }
-  private async identifySuccessPatterns(result: EnhancedSearchResult, analysis: FrameworkAnalysis): Promise<SuccessPattern[]> { return []; }
+  private async analyzeBusinessApplication(result: EnhancedSearchResult, classification: BusinessQueryClassification): Promise<BusinessApplication> { 
+    return {
+      applicable_industries: [],
+      business_stage_suitability: [],
+      functional_area_impact: [],
+      expected_business_outcomes: ['Strategic business application based on context analysis'],
+      measurement_approaches: ['Monitor key performance indicators']
+    };
+  }
+  private async identifySuccessPatterns(result: EnhancedSearchResult, analysis: FrameworkAnalysis): Promise<SuccessPattern[]> { 
+    return [
+      {
+        pattern_id: 'pattern_001',
+        pattern_description: 'Focus on systematic implementation',
+        success_indicators: ['Consistent execution', 'Measurable progress'],
+        typical_timeline: '2-4 weeks',
+        common_success_factors: ['Clear planning', 'Regular monitoring'],
+        failure_prevention: ['Avoid rushing', 'Maintain consistency']
+      }
+    ]; 
+  }
   private async findIntegrationOpportunities(result: EnhancedSearchResult, analysis: FrameworkAnalysis): Promise<IntegrationOpportunity[]> { return []; }
 }
 

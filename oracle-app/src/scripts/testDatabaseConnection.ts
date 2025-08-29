@@ -217,7 +217,7 @@ class OracleDatabaseTester {
         this.status.oracleSchema = true;
         
         if (categories) {
-          categories.forEach(cat => {
+          categories.forEach((cat: any) => {
             console.log(`      - ${cat.name}: ${cat.description}`);
           });
         }

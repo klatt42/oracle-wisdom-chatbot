@@ -190,7 +190,7 @@ export class OracleYouTubeProcessor {
       maxComments = this.DEFAULT_MAX_COMMENTS,
       chapterDetection = true,
       speakerIdentification = false,
-      timestampReferences = true
+      timestampReferences: enableTimestampReferences = true
     } = options;
 
     // Get video metadata via API (if available) or scraping
@@ -219,7 +219,7 @@ export class OracleYouTubeProcessor {
         speakers = await this.identifySpeakers(transcript);
       }
 
-      if (timestampReferences) {
+      if (enableTimestampReferences) {
         timestampReferences = this.generateTimestampReferences(transcript);
       }
     }
@@ -766,18 +766,7 @@ export class OracleYouTubeProcessor {
         author: videoData.channelName,
         createdDate: videoData.publishedAt,
         extractedText: content.substring(0, 1000), // Preview
-        businessRelevance,
-        youtubeMetadata: {
-          videoId: videoData.videoId,
-          channelId: videoData.channelId,
-          duration: videoData.duration,
-          viewCount: videoData.viewCount,
-          likeCount: videoData.likeCount,
-          thumbnailUrl: videoData.thumbnailUrl,
-          tags: videoData.tags,
-          chapters: videoData.chapters,
-          timestampReferences: videoData.timestampReferences
-        }
+        businessRelevance
       }
     };
 
@@ -805,8 +794,7 @@ export class OracleYouTubeProcessor {
       extractedText: content,
       summary: this.generateVideoSummary(content, videoData),
       framework: frameworks.map(f => f.framework),
-      keywords: this.extractKeywords(content),
-      businessConcepts
+      keywords: this.extractKeywords(content)
     };
   }
 

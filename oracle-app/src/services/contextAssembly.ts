@@ -498,7 +498,9 @@ export class OracleContextAssemblyEngine {
     }
 
     // Section 2: Supporting Framework Content
-    const supportingFrameworks = this.identifySupportingFrameworks(queryClassification, sources, primaryFramework);
+    const supportingFrameworks = primaryFramework 
+      ? this.identifySupportingFrameworks(queryClassification as any, sources, primaryFramework)
+      : [];
     for (const framework of supportingFrameworks.slice(0, 2)) { // Limit supporting frameworks
       const supportSection = await this.createFrameworkSection(
         framework,
@@ -727,7 +729,7 @@ export class OracleContextAssemblyEngine {
     const learningProgression = this.generateLearningProgression(
       hierarchyNodes, 
       dependencyMap, 
-      queryClassification.primary_intent
+      queryClassification.primary_intent.intent_type
     );
 
     // Create implementation sequence
@@ -1080,7 +1082,7 @@ export class OracleContextAssemblyEngine {
     return frameworkRelevance.length > 0 ? frameworkRelevance[0].framework : null;
   }
 
-  private identifySupporting Frameworks(classification: BusinessQueryClassification, sources: VectorSearchResult[], primary?: HormoziFramework | null): HormoziFramework[] {
+  private identifySupportingFrameworks(classification: BusinessQueryClassification, sources: VectorSearchResult[], primary?: HormoziFramework | null): HormoziFramework[] {
     return classification.business_context.framework_relevance
       .slice(1)
       .map(fr => fr.framework)

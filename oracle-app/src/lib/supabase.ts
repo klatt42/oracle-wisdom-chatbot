@@ -29,7 +29,7 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 // Legacy interface for Hormozi wisdom search results - now extends WisdomMatch
 export interface HormoziWisdom extends WisdomMatch {
-  id: number;
+  id: string;
   content: string;
   source: string;
   book?: string;
@@ -41,7 +41,7 @@ export interface HormoziWisdom extends WisdomMatch {
   implementation_time?: string;
   success_metrics?: string[];
   related_concepts?: string[];
-  similarity?: number;
+  similarity: number;
   metadata: WisdomMetadata & {
     book?: string;
     chapter?: string;

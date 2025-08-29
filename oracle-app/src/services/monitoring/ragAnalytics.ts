@@ -358,7 +358,12 @@ export class OracleRAGAnalytics {
         shared_response: behavioralIndicators?.shared_response || false,
         rated_helpful: behavioralIndicators?.rated_helpful || false
       },
-      qualitative_feedback: qualitativeFeedback
+      qualitative_feedback: qualitativeFeedback ? {
+        helpful_aspects: qualitativeFeedback.helpful_aspects || [],
+        improvement_suggestions: qualitativeFeedback.improvement_suggestions || [],
+        additional_needs: qualitativeFeedback.additional_needs || [],
+        framework_preferences: qualitativeFeedback.framework_preferences || []
+      } : undefined
     };
 
     this.feedbackBuffer.push(feedbackMetric);

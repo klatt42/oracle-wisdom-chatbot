@@ -61,7 +61,7 @@ export class UrlProcessor {
       console.log(`Starting URL processing: ${url}`);
 
       // Stage 1: URL Validation and Scraping
-      await this.updateJobProgress(processingJobId, 'scraping', 10);
+      await this.updateJobProgress(processingJobId, 'processing', 10);
       const scrapedContent = await urlScraper.scrapeUrl(url);
 
       // Stage 2: Store initial content item
@@ -85,7 +85,7 @@ export class UrlProcessor {
 
       // Stage 5: Update content with final metadata
       await this.updateJobProgress(processingJobId, 'processing', 90);
-      await this.updateContentMetadata(contentId, frameworks, chunks.length);
+      await this.updateContentMetadata(contentId, frameworks, chunks.totalChunks);
 
       // Complete processing
       await this.updateJobProgress(processingJobId, 'completed', 100);
@@ -95,18 +95,27 @@ export class UrlProcessor {
 
       const result: UrlProcessingResult = {
         success: true,
-        contentId,
+        url: url,
+        title: scrapedContent.title,
+        content: contentId, // Store contentId in content field
         metadata: {
-          title: scrapedContent.title,
-          wordCount: scrapedContent.wordCount,
-          quality: scrapedContent.quality.score,
-          frameworks: frameworks.map(f => f.name),
-          processingTime
+          author: scrapedContent.author,
+          published_date: scrapedContent.publishedDate?.toISOString(),
+          description: scrapedContent.description,
+          keywords: frameworks.map(f => f.name),
+          word_count: scrapedContent.wordCount,
+          reading_time_minutes: Math.ceil(scrapedContent.wordCount / 200)
+        },
+        quality_metrics: {
+          content_quality_score: scrapedContent.quality?.score || 0.8,
+          readability_score: scrapedContent.quality?.readabilityScore || 0.7,
+          information_density: scrapedContent.quality?.contentStructure || 0.6,
+          business_relevance: scrapedContent.quality?.metadata || 0.7
         }
       };
 
       // Update job with final result
-      const finalJob = this.activeJobs.get(processingJobId);
+      const finalJob = this.activeJobs.get(processingJobId) as any;
       if (finalJob) {
         finalJob.endTime = new Date();
         finalJob.contentId = contentId;
@@ -118,11 +127,12 @@ export class UrlProcessor {
     } catch (error) {
       console.error(`URL processing failed: ${url}`, error);
 
-      await this.updateJobProgress(processingJobId, 'failed', 0, error.message);
+      await this.updateJobProgress(processingJobId, 'failed', 0, error instanceof Error ? error.message : String(error));
 
       return {
         success: false,
-        error: error.message
+        url: url,
+        error: error instanceof Error ? error.message : String(error)
       };
     } finally {
       // Keep completed/failed jobs for a short time for status checking
@@ -163,6 +173,7 @@ export class UrlProcessor {
           } else {
             results.push({
               success: false,
+              url: 'unknown', // Placeholder since URL info is lost in batch processing
               error: result.reason?.message || 'Unknown error'
             });
           }
@@ -195,10 +206,11 @@ export class UrlProcessor {
   private createProcessingJob(jobId: string, url: string): UrlProcessingJob {
     return {
       id: jobId,
-      url,
+      type: 'url',
+      input: url,
       status: 'pending',
-      progress: 0,
-      startTime: new Date()
+      progress: { stage: 'initialization', percentage: 0 },
+      created_at: new Date().toISOString()
     };
   }
 
@@ -211,12 +223,12 @@ export class UrlProcessor {
     const job = this.activeJobs.get(jobId);
     if (job) {
       job.status = status;
-      job.progress = progress;
+      job.progress = { stage: status, percentage: progress };
       if (error) {
         job.error = error;
       }
       if (status === 'completed' || status === 'failed') {
-        job.endTime = new Date();
+        job.completed_at = new Date().toISOString();
       }
     }
   }
@@ -280,7 +292,7 @@ export class UrlProcessor {
 
     } catch (error) {
       console.error('Error storing content item:', error);
-      throw new Error(`Database storage failed: ${error.message}`);
+      throw new Error(`Database storage failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 

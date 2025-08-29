@@ -88,18 +88,12 @@ export class UrlScraper {
       const dom = new JSDOM(html, { url: finalUrl });
       
       // Use Mozilla Readability for content extraction
-      const reader = new Readability(dom.document, {
-        debug: false,
-        maxElemsToParse: 0,
-        nbTopCandidates: 5,
-        charThreshold: 500,
-        classesToPreserve: []
-      });
-      const readabilityResult = reader.parse();
+      const reader = new Readability(dom.window.document as any);
+      const readabilityResult = (reader as any).parse();
 
       // Extract metadata
-      const metadata = this.extractMetadata($, finalUrl);
-      const content = readabilityResult?.textContent || this.fallbackContentExtraction($);
+      const metadata = this.extractMetadata($ as any, finalUrl);
+      const content = readabilityResult?.textContent || this.fallbackContentExtraction($ as any);
       const title = readabilityResult?.title || $('title').text() || metadata.domain;
 
       // Calculate quality scores
@@ -112,8 +106,8 @@ export class UrlScraper {
         content: content.trim(),
         description: $('meta[name="description"]').attr('content') || 
                     $('meta[property="og:description"]').attr('content'),
-        author: this.extractAuthor($),
-        publishedDate: this.extractPublishedDate($),
+        author: this.extractAuthor($ as any),
+        publishedDate: this.extractPublishedDate($ as any),
         wordCount: this.countWords(content),
         quality,
         metadata: {
@@ -128,7 +122,7 @@ export class UrlScraper {
 
     } catch (error) {
       console.error(`URL scraping failed for ${url}:`, error);
-      throw new Error(`Failed to scrape URL: ${error.message}`);
+      throw new Error(`Failed to scrape URL: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -148,7 +142,7 @@ export class UrlScraper {
 
       return urlObj;
     } catch (error) {
-      throw new Error(`Invalid URL format: ${error.message}`);
+      throw new Error(`Invalid URL format: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -170,7 +164,7 @@ export class UrlScraper {
       const robotsText = await response.text();
       return this.parseRobotsTxt(robotsText, this.options.userAgent || this.defaultOptions.userAgent!);
     } catch (error) {
-      console.warn(`Failed to check robots.txt for ${origin}:`, error.message);
+      console.warn(`Failed to check robots.txt for ${origin}:`, error instanceof Error ? error.message : String(error));
       return { allowed: true }; // Allow scraping if robots.txt check fails
     }
   }
@@ -237,7 +231,7 @@ export class UrlScraper {
       return response;
     } catch (error) {
       clearTimeout(timeoutId);
-      if (error.name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         throw new Error('Request timeout');
       }
       throw error;
@@ -317,9 +311,10 @@ export class UrlScraper {
     const headings: Array<{ level: number; text: string }> = [];
     
     $('h1, h2, h3, h4, h5, h6').each((_, element) => {
-      const tagName = element.tagName.toLowerCase();
+      const $element = $(element);
+      const tagName = $element.prop('tagName')?.toLowerCase() || 'h1';
       const level = parseInt(tagName.charAt(1));
-      const text = $(element).text().trim();
+      const text = $element.text().trim();
       
       if (text.length > 0) {
         headings.push({ level, text });
@@ -443,7 +438,7 @@ export class UrlScraper {
     if (metadata.keywords.length > 0) metadataScore += 20;
     if (metadata.keywords.length > 5) metadataScore += 20;
     if (content.includes('business') || content.includes('strategy') || content.includes('marketing')) metadataScore += 20;
-    if (metadata.headings.some(h => h.text.length > 10)) metadataScore += 20;
+    if (metadata.headings.some((h: any) => h.text.length > 10)) metadataScore += 20;
     if (metadata.domain.includes('edu') || metadata.domain.includes('gov')) metadataScore += 20;
 
     // Overall score (weighted average)
@@ -489,7 +484,7 @@ export class UrlScraper {
 
       return { isValid: true };
     } catch (error) {
-      return { isValid: false, error: `Invalid URL format: ${error.message}` };
+      return { isValid: false, error: `Invalid URL format: ${error instanceof Error ? error.message : String(error)}` };
     }
   }
 }

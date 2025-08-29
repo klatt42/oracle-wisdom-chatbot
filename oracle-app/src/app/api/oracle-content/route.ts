@@ -4,7 +4,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { processingPipeline } from '../../../lib/content-processing/processing-pipeline';
 import { supabaseAdmin } from '../../../lib/supabase';
 
 // GET /api/oracle-content - Get all content with filtering
@@ -136,6 +135,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Process items through the universal pipeline
+    const { processingPipeline } = await import('../../../lib/content-processing/processing-pipeline');
     const maxConcurrent = Math.min(5, Math.ceil(validItems.length / 2));
     const results = await processingPipeline.processBatch(validItems, options, maxConcurrent);
 

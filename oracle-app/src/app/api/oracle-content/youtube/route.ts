@@ -66,7 +66,8 @@ export async function POST(request: NextRequest) {
         url: urls[index],
         videoId: validationResults[index].videoId,
         success: result.success,
-        contentId: result.contentId,
+        video_id: result.video_id,
+        title: result.title,
         error: result.error,
         metadata: result.metadata
       }))

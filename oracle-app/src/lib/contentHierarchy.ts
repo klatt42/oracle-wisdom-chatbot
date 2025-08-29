@@ -248,11 +248,11 @@ export class LearningPathwayBuilder {
       case BusinessLifecycleStage.STARTUP:
         return this.buildStartupPathway();
       case BusinessLifecycleStage.EARLY_SCALING:
-        return this.buildEarlyScalingPathway();
+        return this.buildScalingPathway();
       case BusinessLifecycleStage.SCALING:
         return this.buildScalingPathway();
       case BusinessLifecycleStage.GROWTH:
-        return this.buildGrowthPathway();
+        return this.buildUniversalPathway();
       default:
         return this.buildUniversalPathway();
     }

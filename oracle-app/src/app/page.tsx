@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { OracleLogin } from '@/components/OracleLogin';
-import { OracleApp } from '@/components/oracle/OracleApp';
+import { OracleLogin } from '../components/OracleLogin';
+import { OracleApp } from '../components/oracle/OracleApp';
 
 export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
