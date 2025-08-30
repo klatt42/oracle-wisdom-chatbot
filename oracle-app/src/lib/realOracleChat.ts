@@ -78,7 +78,7 @@ export class RealOracleChat {
         .select('*', { count: 'exact', head: true });
 
       if (error) {
-        throw new Error(`Database connectivity failed: ${error.message}`);
+        throw new Error(`Database connectivity failed: ${error instanceof Error ? error.message : String(error)}`);
       }
 
       console.log(`✅ Connected to Hormozi Wisdom Database: ${count} wisdom entries available`);
@@ -149,7 +149,7 @@ Always use the search results provided to give specific, data-backed responses.`
       
       // Fallback response with diagnostic info
       return {
-        content: `I encountered a technical issue accessing the wisdom database. Error details: ${error.message}\n\nPlease try rephrasing your question or contact support if this persists.`,
+        content: `I encountered a technical issue accessing the wisdom database. Error details: ${error instanceof Error ? error.message : String(error)}\n\nPlease try rephrasing your question or contact support if this persists.`,
         metadata: {
           searchQuery: userMessage,
           searchResults: [],
@@ -170,7 +170,7 @@ Always use the search results provided to give specific, data-backed responses.`
 
       if (error) {
         console.error('🔥 Database search error:', error);
-        throw new Error(`Search failed: ${error.message}`);
+        throw new Error(`Search failed: ${error instanceof Error ? error.message : String(error)}`);
       }
 
       if (!data || data.length === 0) {
@@ -184,7 +184,7 @@ Always use the search results provided to give specific, data-backed responses.`
           .limit(options.maxSearchResults || 5);
 
         if (fallbackError) {
-          throw new Error(`Fallback search failed: ${fallbackError.message}`);
+          throw new Error(`Fallback search failed: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`);
         }
 
         return fallbackData || [];
