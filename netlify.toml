@@ -6,7 +6,14 @@
 [build.environment]
   NODE_ENV = "production"
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# Next.js Netlify Plugin for proper API route handling
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Functions configuration for API routes
+[functions]
+  external_node_modules = ["@anthropic-ai/sdk", "@supabase/supabase-js", "openai"]
+  node_bundler = "esbuild"
+  directory = "oracle-app/.netlify/functions"
+
+# No redirects needed - Next.js plugin handles routing
