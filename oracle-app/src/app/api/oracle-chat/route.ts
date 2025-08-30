@@ -92,14 +92,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<ChatRespo
     
   } catch (error) {
     console.error('🔥 Oracle chat API error:', error);
-    console.error('🔍 Error stack:', error.stack);
+    console.error('🔍 Error stack:', error instanceof Error ? error.stack : 'No stack trace available');
     
     return NextResponse.json(
       { 
         success: false, 
         error: {
           code: 'CHAT_ERROR',
-          message: `Oracle database connectivity failed: ${error.message}`,
+          message: `Oracle database connectivity failed: ${error instanceof Error ? error.message : String(error)}`,
           details: { 
             originalError: String(error),
             timestamp: new Date().toISOString(),
@@ -199,14 +199,14 @@ export async function GET(request: NextRequest): Promise<NextResponse<HistoryRes
     
   } catch (error) {
     console.error('🔥 Oracle GET API error:', error);
-    console.error('🔍 Error stack:', error.stack);
+    console.error('🔍 Error stack:', error instanceof Error ? error.stack : 'No stack trace available');
     
     return NextResponse.json(
       { 
         success: false, 
         error: {
           code: 'GET_ERROR',
-          message: `Oracle GET request failed: ${error.message}`,
+          message: `Oracle GET request failed: ${error instanceof Error ? error.message : String(error)}`,
           details: { 
             originalError: String(error),
             timestamp: new Date().toISOString(),
