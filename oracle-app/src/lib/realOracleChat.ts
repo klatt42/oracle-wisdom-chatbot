@@ -42,7 +42,7 @@ export interface WisdomSource {
 
 export class RealOracleChat {
   private supabase: SupabaseClient;
-  private openai: OpenAI;
+  private openai: OpenAI | null;
   private conversationHistory: Array<{role: string; content: string}> = [];
 
   constructor() {
@@ -62,6 +62,7 @@ export class RealOracleChat {
     const openaiKey = process.env.OPENAI_API_KEY;
     if (!openaiKey) {
       console.warn('⚠️ OpenAI API key missing - Oracle will use template responses');
+      this.openai = null;
     } else {
       this.openai = new OpenAI({ apiKey: openaiKey });
     }
