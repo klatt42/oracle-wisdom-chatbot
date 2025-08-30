@@ -5,26 +5,26 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import RAGQueryEngine from '../../../lib/ragQueryEngine';
-import QueryPreprocessor, { 
+// Dynamic imports for server-side modules to prevent build-time evaluation issues
+import { 
   QueryPreprocessingRequest, 
   UserContextData, 
   PreprocessingOptions, 
   OptimizationTarget 
-} from '@/lib/queryPreprocessor';
-import EnhancedVectorSearch, { SemanticSearchQuery } from '@/lib/enhancedVectorSearch';
-import ContextAssemblyEngine, { AssemblyContext, QualityRequirements } from '@/lib/contextAssemblyEngine';
-import ResponseRankingSystem, { 
+} from '../../../lib/queryPreprocessor';
+import { SemanticSearchQuery } from '../../../lib/enhancedVectorSearch';
+import { AssemblyContext, QualityRequirements } from '../../../lib/contextAssemblyEngine';
+import { 
   RankingRequest, 
   RankingCriteria, 
   UserPreferences 
-} from '@/lib/responseRankingSystem';
+} from '../../../lib/responseRankingSystem';
 import { 
   UserIntent,
   BusinessLifecycleStage,
   IndustryVertical,
   FunctionalArea
-} from '@/types/businessIntelligence';
+} from '../../../types/businessIntelligence';
 
 // API request/response interfaces
 export interface OracleRAGRequest {
@@ -127,19 +127,15 @@ export interface OracleRAGResponse {
 
 // Main RAG service class
 class OracleRAGService {
-  private ragEngine: RAGQueryEngine;
-  private queryPreprocessor: QueryPreprocessor;
-  private vectorSearch: EnhancedVectorSearch;
-  private contextAssembly: ContextAssemblyEngine;
-  private responseRanking: ResponseRankingSystem;
+  private ragEngine: any;
+  private queryPreprocessor: any;
+  private vectorSearch: any;
+  private contextAssembly: any;
+  private responseRanking: any;
   private initialized: boolean = false;
 
   constructor() {
-    this.ragEngine = new RAGQueryEngine();
-    this.queryPreprocessor = new QueryPreprocessor();
-    this.vectorSearch = new EnhancedVectorSearch();
-    this.contextAssembly = new ContextAssemblyEngine();
-    this.responseRanking = new ResponseRankingSystem();
+    // Modules will be dynamically imported during initialization
   }
 
   async initialize(): Promise<void> {
@@ -149,6 +145,29 @@ class OracleRAGService {
     const initStartTime = Date.now();
     
     try {
+      // Dynamic imports to avoid build-time module resolution issues
+      const [
+        { default: RAGQueryEngine },
+        { default: QueryPreprocessor },
+        { default: EnhancedVectorSearch },
+        { default: ContextAssemblyEngine },
+        { default: ResponseRankingSystem }
+      ] = await Promise.all([
+        import('../../../lib/ragQueryEngine'),
+        import('../../../lib/queryPreprocessor'),
+        import('../../../lib/enhancedVectorSearch'),
+        import('../../../lib/contextAssemblyEngine'),
+        import('../../../lib/responseRankingSystem')
+      ]);
+      
+      // Initialize service instances
+      this.ragEngine = new RAGQueryEngine();
+      this.queryPreprocessor = new QueryPreprocessor();
+      this.vectorSearch = new EnhancedVectorSearch();
+      this.contextAssembly = new ContextAssemblyEngine();
+      this.responseRanking = new ResponseRankingSystem();
+      
+      // Initialize the services that need async setup
       await Promise.all([
         this.ragEngine.initialize(),
         this.vectorSearch.initialize()

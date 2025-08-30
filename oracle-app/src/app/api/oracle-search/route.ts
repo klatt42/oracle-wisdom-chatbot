@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { OracleVectorDB } from '@/lib/oracleVectorDB';
+import { OracleVectorDB } from '../../../lib/oracleVectorDB';
 
 // Initialize vector database instance
 let vectorDB: OracleVectorDB | null = null;

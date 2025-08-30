@@ -3,8 +3,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { 
   searchOracleKnowledgeBase,
   storeOracleConversation
-} from '@/lib/supabase';
-import { WisdomMatch } from '@/types/oracle';
+} from '../../../lib/supabase';
+import { WisdomMatch } from '../../../types/oracle';
 
 // Initialize Claude client
 const anthropic = new Anthropic({
