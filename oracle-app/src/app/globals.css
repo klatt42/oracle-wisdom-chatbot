@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Oracle Mystical Theme - Blue/Gold Wisdom Colors */
 :root {
@@ -17,12 +19,7 @@
   --foreground: var(--oracle-text-light);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* Removed @theme inline - Tailwind v3 compatibility */
 
 body {
   background: linear-gradient(135deg, var(--oracle-deep-blue) 0%, var(--oracle-midnight-blue) 100%);
