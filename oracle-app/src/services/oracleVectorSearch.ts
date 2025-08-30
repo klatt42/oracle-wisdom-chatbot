@@ -374,6 +374,10 @@ export class OracleVectorSearchService {
           id,
           title,
           content,
+          content_preview,
+          business_phase,
+          framework_tags,
+          complexity_level,
           metadata,
           embedding,
           created_at,
@@ -423,6 +427,10 @@ export class OracleVectorSearchService {
           id,
           title,
           content,
+          content_preview,
+          business_phase,
+          framework_tags,
+          complexity_level,
           metadata,
           created_at,
           updated_at
@@ -543,11 +551,19 @@ export class OracleVectorSearchService {
 
     const { data, error } = await this.supabase
       .from('oracle_knowledge')
-      .select('*')
+      .select(`
+        id,
+        title,
+        content,
+        content_preview,
+        business_phase,
+        framework_tags,
+        complexity_level,
+        metadata,
+        created_at,
+        updated_at
+      `)
       .textSearch('content', metricTerms)
-      .or(financialExpansion.detected_metrics.map(metric => 
-        `metadata->>financial_metrics.cs.{${metric.metric_name}}`
-      ).join(','))
       .limit(maxResults);
 
     if (error) {
@@ -569,11 +585,24 @@ export class OracleVectorSearchService {
     }
 
     if (filters.business_stages?.length) {
-      query = query.in('metadata->>business_stage', filters.business_stages);
+      query = query.in('business_phase', filters.business_stages);
     }
 
     if (filters.content_types?.length) {
-      query = query.in('metadata->>content_type', filters.content_types);
+      // Map content_types to appropriate business_phase values
+      const businessPhases = [];
+      for (const contentType of filters.content_types) {
+        if (contentType === 'framework' || contentType === 'implementation') {
+          businessPhases.push('scaling', 'optimization');
+        } else if (contentType === 'startup' || contentType === 'basic') {
+          businessPhases.push('startup');
+        } else {
+          businessPhases.push('all');
+        }
+      }
+      if (businessPhases.length > 0) {
+        query = query.in('business_phase', businessPhases);
+      }
     }
 
     if (filters.authority_levels?.length) {
@@ -599,7 +628,7 @@ export class OracleVectorSearchService {
     return data.map((item, index) => ({
       id: item.id,
       content: item.content,
-      metadata: this.parseMetadata(item.metadata),
+      metadata: this.parseMetadata(item),
       similarity_score: item.similarity || (1 - (index * 0.1)), // Fallback scoring
       relevance_score: 0, // Will be calculated later
       quality_score: 0, // Will be calculated later
@@ -608,22 +637,22 @@ export class OracleVectorSearchService {
     }));
   }
 
-  // Parse metadata from Supabase JSON
-  private parseMetadata(metadata: any): KnowledgeMetadata {
+  // Parse metadata from database record
+  private parseMetadata(record: any): KnowledgeMetadata {
     return {
-      title: metadata.title || 'Untitled',
-      source_type: metadata.source_type || 'unknown',
-      framework: metadata.framework as HormoziFramework,
-      industry: metadata.industry as IndustryVertical,
-      business_stage: metadata.business_stage as BusinessLifecycleStage,
-      authority_level: metadata.authority_level || 'unverified',
-      verification_status: metadata.verification_status || 'pending',
-      content_hash: metadata.content_hash || '',
-      created_at: metadata.created_at || new Date().toISOString(),
-      updated_at: metadata.updated_at || new Date().toISOString(),
-      tags: metadata.tags || [],
-      financial_metrics: metadata.financial_metrics || [],
-      implementation_level: metadata.implementation_level
+      title: record.title || 'Untitled',
+      source_type: record.metadata?.source_type || 'oracle_knowledge',
+      framework: record.framework_tags?.[0] as HormoziFramework,
+      industry: record.metadata?.industry as IndustryVertical,
+      business_stage: record.business_phase as BusinessLifecycleStage,
+      authority_level: record.metadata?.authority_level || 'verified',
+      verification_status: record.metadata?.verification_status || 'verified',
+      content_hash: record.metadata?.content_hash || '',
+      created_at: record.created_at || new Date().toISOString(),
+      updated_at: record.updated_at || new Date().toISOString(),
+      tags: record.metadata?.tags || [],
+      financial_metrics: record.metadata?.financial_metrics || [],
+      implementation_level: record.complexity_level || 'intermediate'
     };
   }
 
