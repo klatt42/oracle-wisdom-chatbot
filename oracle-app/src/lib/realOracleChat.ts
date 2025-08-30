@@ -43,7 +43,7 @@ export interface WisdomSource {
 export class RealOracleChat {
   private supabase: SupabaseClient;
   private openai: OpenAI | null;
-  private conversationHistory: Array<{role: string; content: string}> = [];
+  private conversationHistory: Array<{role: 'user' | 'assistant' | 'system'; content: string}> = [];
 
   constructor() {
     // Initialize Supabase with service role for full access
