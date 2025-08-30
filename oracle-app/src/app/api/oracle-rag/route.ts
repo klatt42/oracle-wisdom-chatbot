@@ -5,26 +5,73 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-// Dynamic imports for server-side modules to prevent build-time evaluation issues
-import { 
-  QueryPreprocessingRequest, 
-  UserContextData, 
-  PreprocessingOptions, 
-  OptimizationTarget 
-} from '../../../lib/queryPreprocessor';
-import { SemanticSearchQuery } from '../../../lib/enhancedVectorSearch';
-import { AssemblyContext, QualityRequirements } from '../../../lib/contextAssemblyEngine';
-import { 
-  RankingRequest, 
-  RankingCriteria, 
-  UserPreferences 
-} from '../../../lib/responseRankingSystem';
+// Import only types and enums that are used in interface definitions - these won't cause build issues
 import { 
   UserIntent,
   BusinessLifecycleStage,
   IndustryVertical,
   FunctionalArea
 } from '../../../types/businessIntelligence';
+
+// Type interfaces - imported types are safe for interfaces
+type QueryPreprocessingRequest = {
+  request_id: string;
+  original_query: string;
+  user_context?: UserContextData;
+  preprocessing_options: PreprocessingOptions;
+  optimization_targets: OptimizationTarget[];
+};
+
+type UserContextData = {
+  business_stage?: BusinessLifecycleStage;
+  industry?: IndustryVertical;
+  functional_role?: FunctionalArea;
+  experience_level?: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  previous_queries?: string[];
+  session_context?: {
+    session_id: string;
+    query_history: string[];
+    topic_progression: string[];
+    implementation_focus_areas: string[];
+    current_business_challenges: string[];
+  };
+};
+
+type PreprocessingOptions = {
+  enable_query_expansion: boolean;
+  enable_business_terminology_optimization: boolean;
+  enable_framework_detection: boolean;
+  enable_intent_classification: boolean;
+  enable_context_enrichment: boolean;
+  enable_synonym_expansion: boolean;
+  enable_entity_extraction: boolean;
+  enable_sentiment_analysis: boolean;
+  max_query_length: number;
+  preserve_user_language_style: boolean;
+};
+
+type OptimizationTarget = {
+  target_type: string;
+  weight: number;
+};
+
+type SemanticSearchQuery = {
+  query_text: string;
+  search_strategy: any;
+  business_filters: any;
+  performance_parameters: any;
+  result_enhancement: any;
+};
+
+type AssemblyContext = {
+  context_id: string;
+  original_query: string;
+  user_intent: string;
+  business_context: any;
+  source_chunks: any[];
+  assembly_strategy: any;
+  quality_requirements: any;
+};
 
 // API request/response interfaces
 export interface OracleRAGRequest {

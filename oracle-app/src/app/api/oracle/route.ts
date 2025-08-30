@@ -115,25 +115,105 @@ function generateCitationsFromWisdom(wisdomResults: WisdomMatch[]): string[] {
 }
 
 export async function POST(request: NextRequest) {
+  const diagnosticLog = {
+    timestamp: new Date().toISOString(),
+    request_id: `oracle_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    execution_steps: [] as Array<{
+      step: string;
+      timestamp: string;
+      data: any;
+      isError: boolean;
+    }>
+  };
+
+  function logStep(step: string, data: any, isError = false) {
+    const logEntry = {
+      step,
+      timestamp: new Date().toISOString(),
+      data,
+      isError
+    };
+    diagnosticLog.execution_steps.push(logEntry);
+    
+    if (isError) {
+      console.error(`❌ ORACLE ERROR - ${step}:`, data);
+    } else {
+      console.log(`✅ ORACLE STEP - ${step}:`, data);
+    }
+  }
+
   try {
+    logStep('function_start', { environment: 'netlify_serverless', runtime: 'nodejs' });
+
+    // Step 1: Parse request
     const { message, sessionId } = await request.json();
+    logStep('request_parsed', { 
+      message_length: message?.length || 0,
+      has_session_id: !!sessionId,
+      message_preview: message?.substring(0, 50) + '...' || 'none'
+    });
 
     if (!message) {
+      logStep('validation_failed', { error: 'Missing message' }, true);
       return NextResponse.json(
-        { error: 'Message is required' },
+        { error: 'Message is required', diagnostic_log: diagnosticLog },
         { status: 400 }
       );
     }
 
-    // Detect business context and search enhanced knowledge base
+    // Step 2: Environment check
+    logStep('environment_check', {
+      anthropic_key_present: !!process.env.ANTHROPIC_API_KEY,
+      supabase_url_present: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      supabase_service_key_present: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+    });
+
+    // Step 3: Business context detection
     const businessContext = detectBusinessContext(message);
+    logStep('business_context_detected', { 
+      context: businessContext,
+      message_keywords: message.toLowerCase().split(' ').slice(0, 5)
+    });
+
+    // Step 4: Knowledge base search with detailed logging
+    logStep('knowledge_search_start', { 
+      search_context: businessContext,
+      include_processed: true,
+      limit: 5
+    });
+
+    const searchStart = Date.now();
     const wisdomResults = await searchOracleKnowledgeBase(message, businessContext, true, 5);
-    
-    // Format wisdom content for Claude prompt
+    const searchTime = Date.now() - searchStart;
+
+    logStep('knowledge_search_complete', {
+      search_time_ms: searchTime,
+      results_found: wisdomResults.length,
+      results_preview: wisdomResults.map(r => ({
+        content_preview: r.content?.substring(0, 50) + '...',
+        source: r.source,
+        similarity: r.similarity
+      }))
+    });
+
+    // Step 5: Prompt preparation
     const wisdomContent = formatWisdomForPrompt(wisdomResults);
     const enhancedPrompt = ORACLE_SYSTEM_PROMPT + wisdomContent;
+    
+    logStep('prompt_prepared', {
+      wisdom_content_length: wisdomContent.length,
+      enhanced_prompt_length: enhancedPrompt.length,
+      wisdom_pieces_included: wisdomResults.length
+    });
 
-    // Call Claude API with enhanced prompt including relevant wisdom
+    // Step 6: Claude API call with error handling
+    logStep('anthropic_api_call_start', {
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 1200,
+      temperature: 0.7
+    });
+
+    const anthropicStart = Date.now();
     const response = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: 1200,
@@ -146,8 +226,16 @@ export async function POST(request: NextRequest) {
         },
       ],
     });
+    const anthropicTime = Date.now() - anthropicStart;
 
-    // Extract response content
+    logStep('anthropic_api_call_complete', {
+      response_time_ms: anthropicTime,
+      response_type: response.content[0]?.type,
+      response_length: response.content[0]?.type === 'text' ? response.content[0].text.length : 0,
+      usage: response.usage
+    });
+
+    // Step 7: Response processing
     const responseContent = response.content[0];
     const oracleResponse = responseContent.type === 'text' ? responseContent.text : 'The Oracle remains silent.';
 
@@ -156,23 +244,57 @@ export async function POST(request: NextRequest) {
       ? generateCitationsFromWisdom(wisdomResults)
       : generateMockCitations(message);
 
-    // Store conversation for analytics (asynchronous)
+    logStep('response_processed', {
+      oracle_response_length: oracleResponse.length,
+      citations_count: citations.length,
+      wisdom_used: wisdomResults.length > 0,
+      citation_sources: citations
+    });
+
+    // Step 8: Store conversation (async)
     storeOracleConversation(message, oracleResponse, citations, sessionId).catch(err => {
-      console.error('Error storing conversation:', err);
+      logStep('conversation_storage_failed', { error: err.message }, true);
+    });
+
+    logStep('function_complete', {
+      total_execution_time_ms: Date.now() - new Date(diagnosticLog.timestamp).getTime(),
+      wisdom_utilized: wisdomResults.length > 0,
+      response_quality: 'success'
     });
 
     return NextResponse.json({
       response: oracleResponse,
       citations: citations,
       wisdomUsed: wisdomResults.length > 0,
+      diagnostic: {
+        request_id: diagnosticLog.request_id,
+        wisdom_count: wisdomResults.length,
+        search_time_ms: searchTime,
+        anthropic_time_ms: anthropicTime,
+        knowledge_base_active: wisdomResults.length > 0
+      }
     });
 
   } catch (error) {
-    console.error('Oracle API Error:', error);
-    return NextResponse.json(
-      { error: 'The Oracle\'s connection has been disrupted. Please try again.' },
-      { status: 500 }
-    );
+    logStep('fatal_error', {
+      error_message: error instanceof Error ? error.message : String(error),
+      error_stack: error instanceof Error ? error.stack : undefined,
+      error_type: error?.constructor?.name
+    }, true);
+
+    console.error('❌ ORACLE FATAL ERROR:', error);
+    console.log('📋 FULL DIAGNOSTIC LOG:', JSON.stringify(diagnosticLog, null, 2));
+
+    return NextResponse.json({
+      error: 'Oracle execution failed - see diagnostic log for details',
+      technical_error: error instanceof Error ? error.message : String(error),
+      diagnostic_log: diagnosticLog,
+      debug_info: {
+        execution_environment: 'netlify_serverless',
+        timestamp: new Date().toISOString(),
+        request_id: diagnosticLog.request_id
+      }
+    }, { status: 500 });
   }
 }
 

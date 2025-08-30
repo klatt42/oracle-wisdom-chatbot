@@ -5,29 +5,29 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { OracleChat, OracleChatOptions } from '../../../lib/oracleChat';
+import { RealOracleChat, HormoziWisdomResult, WisdomSource } from '../../../lib/realOracleChat';
 import { 
   ApiResponse,
-  WisdomSource,
   ContentMetadata,
   OracleMessage
 } from '@/types/oracle';
-import { SearchResult } from '@/lib/oracleVectorDB';
 
 // Initialize Oracle chat instance
-let oracleChat: OracleChat | null = null;
+let oracleChat: RealOracleChat | null = null;
 
-async function getOracleChat(): Promise<OracleChat> {
+async function getOracleChat(): Promise<RealOracleChat> {
   if (!oracleChat) {
-    oracleChat = new OracleChat();
+    console.log('🔮 Initializing Real Oracle Chat instance...');
+    oracleChat = new RealOracleChat();
     await oracleChat.initialize();
+    console.log('✅ Real Oracle Chat ready for queries');
   }
   return oracleChat;
 }
 
 interface ChatRequest {
   message: string;
-  options?: Partial<OracleChatOptions>;
+  options?: any; // Simplified options for Real Oracle Chat
 }
 
 type ChatResponse = ApiResponse<{
@@ -54,17 +54,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<ChatRespo
       );
     }
     
+    console.log('📨 Processing Oracle chat request:', message);
     const oracle = await getOracleChat();
-    const chatOptions: OracleChatOptions = {
+    
+    const chatOptions = {
       maxSearchResults: options?.maxSearchResults || 5,
       similarityThreshold: options?.similarityThreshold || 0.8,
       categoryFilter: options?.categoryFilter,
-      includeYouTubeContent: options?.includeYouTubeContent !== false,
-      enhanceWithContext: options?.enhanceWithContext !== false,
       ...options
     };
     
     const response = await oracle.generateResponse(message, chatOptions);
+    console.log('🔮 Oracle response generated successfully');
     
     const responseMetadata: ContentMetadata = {
       processed_at: new Date().toISOString(),
@@ -90,15 +91,20 @@ export async function POST(request: NextRequest): Promise<NextResponse<ChatRespo
     });
     
   } catch (error) {
-    console.error('Oracle chat API error:', error);
+    console.error('🔥 Oracle chat API error:', error);
+    console.error('🔍 Error stack:', error.stack);
     
     return NextResponse.json(
       { 
         success: false, 
         error: {
           code: 'CHAT_ERROR',
-          message: 'Chat response failed',
-          details: { originalError: String(error) }
+          message: `Oracle database connectivity failed: ${error.message}`,
+          details: { 
+            originalError: String(error),
+            timestamp: new Date().toISOString(),
+            debugInfo: 'Check Supabase connection and hormozi_wisdom table'
+          }
         }
       },
       { status: 500 }
@@ -118,7 +124,7 @@ type SuggestionsResponse = ApiResponse<{
 
 type InsightsResponse = ApiResponse<{
   category: string;
-  insights: SearchResult[];
+  insights: HormoziWisdomResult[];
   count: number;
 }>;
 
@@ -192,15 +198,20 @@ export async function GET(request: NextRequest): Promise<NextResponse<HistoryRes
     }
     
   } catch (error) {
-    console.error('Oracle chat API error:', error);
+    console.error('🔥 Oracle GET API error:', error);
+    console.error('🔍 Error stack:', error.stack);
     
     return NextResponse.json(
       { 
         success: false, 
         error: {
           code: 'GET_ERROR',
-          message: 'Request failed',
-          details: { originalError: String(error) }
+          message: `Oracle GET request failed: ${error.message}`,
+          details: { 
+            originalError: String(error),
+            timestamp: new Date().toISOString(),
+            debugInfo: 'Check Oracle database connectivity and function availability'
+          }
         }
       },
       { status: 500 }
