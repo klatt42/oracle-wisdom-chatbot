@@ -215,6 +215,10 @@ Always use the search results provided to give specific, data-backed responses.`
     try {
       const context = this.buildSearchContext(userQuery, searchResults);
 
+      if (!this.openai) {
+        return this.generateTemplateResponse(userQuery, searchResults);
+      }
+
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-4-turbo-preview',
         messages: [
